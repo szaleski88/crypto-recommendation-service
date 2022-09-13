@@ -14,20 +14,14 @@ import lombok.Setter;
 @Setter
 public class CryptoReport {
 
-    private String cryptoSymbol;
-    private String reportedMonth;
+    private String currency;
+    private LocalDateTime fromDate;
+    private LocalDateTime toDate;
     private BigDecimal normalizedValue;
 
-    private BigDecimal maxValue;
-    private LocalDateTime maxValueDate;
-
-    private BigDecimal minValue;
-    private LocalDateTime minValueDate;
-
-    private BigDecimal newestValue;
-    private LocalDateTime newestValueDate;
-
-    private BigDecimal oldestValue;
-    private LocalDateTime oldestValueDate;
+    private PriceData oldestPrice;
+    private PriceData newestPrice;
+    private PriceData maxPrice;
+    private PriceData minPrice;
 
 }

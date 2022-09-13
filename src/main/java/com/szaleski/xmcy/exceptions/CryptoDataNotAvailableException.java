@@ -4,11 +4,21 @@ import java.util.Date;
 
 import com.szaleski.xmcy.utils.DateUtils;
 
+import lombok.Getter;
+
+@Getter
 public class CryptoDataNotAvailableException extends RuntimeException {
 
     private static final String MSG_TEMPLATE = "No data for Crypto symbol: '%s' for date: '%s'.";
+    private static final String MSG_TEMPLATE_DATE = "No data for date: '%s'.";
     private final String symbol;
     private final Date date;
+
+    public CryptoDataNotAvailableException(String message) {
+        super(message);
+        this.symbol = "None";
+        this.date = null;
+    }
 
     public CryptoDataNotAvailableException(String message, String symbol, Date date) {
         super(message);
@@ -17,16 +27,15 @@ public class CryptoDataNotAvailableException extends RuntimeException {
     }
 
     public static CryptoDataNotAvailableException forSymbolAndDate(String symbol, Date date) {
-        String dateString = DateUtils.toDateString(date);
+        String dateString = date == null ? "None" : DateUtils.toDateString(date);
         String message = String.format(MSG_TEMPLATE, symbol, dateString);
         return new CryptoDataNotAvailableException(message, symbol, date);
     }
 
-    public String getSymbol() {
-        return symbol;
+    public static CryptoDataNotAvailableException forDate(Date date) {
+        String dateString = DateUtils.toDateString(date);
+        String message = String.format(MSG_TEMPLATE_DATE, dateString);
+        return new CryptoDataNotAvailableException(message, "None", date);
     }
 
-    public Date getDate() {
-        return date;
-    }
 }

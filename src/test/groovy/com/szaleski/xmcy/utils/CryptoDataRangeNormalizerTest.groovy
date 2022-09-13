@@ -3,9 +3,9 @@ package com.szaleski.xmcy.utils
 import com.szaleski.xmcy.model.Crypto
 import spock.lang.Specification
 
-class NormalizerTest extends Specification {
+class CryptoDataRangeNormalizerTest extends Specification {
 
-    private static Normalizer normalizer = new Normalizer()
+    private static CryptoDataRangeNormalizer normalizer = new CryptoDataRangeNormalizer()
 
     def "Crypto price properly normalized"() {
         given:
@@ -17,7 +17,7 @@ class NormalizerTest extends Specification {
             it.getPrice() >> max
         }
         when:
-        def result = normalizer.normalize([cryptoA, cryptoB])
+        def result = normalizer.getSingleNormalizedRange([cryptoA, cryptoB])
 
         then:
         result == expected
@@ -31,6 +31,6 @@ class NormalizerTest extends Specification {
 
     def "No crypto"(){
         expect:
-        -1 == normalizer.normalize([])
+        -1 == normalizer.getSingleNormalizedRange([])
     }
 }

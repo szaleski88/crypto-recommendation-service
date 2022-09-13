@@ -1,67 +1,51 @@
 package com.szaleski.xmcy.utils;
 
+import static com.szaleski.xmcy.model.PriceData.from;
+
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException;
-import com.szaleski.xmcy.model.Crypto;
+import com.szaleski.xmcy.model.CryptoData;
 import com.szaleski.xmcy.model.CryptoReport;
-import com.szaleski.xmcy.repository.CryptoRepository;
 
 @Component
 public class CryptoReportGenerator {
 
-    private final CryptoRepository cryptoRepository;
     private final CryptoFilter cryptoFilter;
-    private final Normalizer normalizer;
+    private final CryptoDataRangeNormalizer cryptoDataRangeNormalizer;
 
-    public CryptoReportGenerator(CryptoRepository cryptoRepository, CryptoFilter cryptoFilter, Normalizer normalizer) {
-        this.cryptoRepository = cryptoRepository;
+    public CryptoReportGenerator(CryptoFilter cryptoFilter, CryptoDataRangeNormalizer cryptoDataRangeNormalizer) {
         this.cryptoFilter = cryptoFilter;
-        this.normalizer = normalizer;
+        this.cryptoDataRangeNormalizer = cryptoDataRangeNormalizer;
     }
 
-    public CryptoReport generateReportFor(String symbol, Date date) {
-        final List<Crypto> cryptoValuesForMonth = fetchDataForReport(symbol, date);
-
-        if(cryptoValuesForMonth.isEmpty()) {
+    public CryptoReport generateReportFor(String symbol, List<CryptoData> dataForReport, @Nullable Date date) {
+        if (dataForReport.isEmpty()) {
             throw CryptoDataNotAvailableException.forSymbolAndDate(symbol, date);
         }
 
-        final Crypto min = cryptoFilter.getMin(cryptoValuesForMonth);
-        final Crypto max = cryptoFilter.getMax(cryptoValuesForMonth);
-        final Crypto oldest = cryptoFilter.getOldest(cryptoValuesForMonth);
-        final Crypto newest = cryptoFilter.getNewest(cryptoValuesForMonth);
-        final BigDecimal monthlyNormalized = normalizer.normalize(cryptoValuesForMonth);
+        final CryptoData min = cryptoFilter.getMin(dataForReport);
+        final CryptoData max = cryptoFilter.getMax(dataForReport);
+        final CryptoData oldest = cryptoFilter.getOldest(dataForReport);
+        final CryptoData newest = cryptoFilter.getNewest(dataForReport);
+        final BigDecimal normalizedPrice = cryptoDataRangeNormalizer.getSingleNormalizedRange(dataForReport);
         final CryptoReport report = new CryptoReport();
+        report.setCurrency(symbol);
+        report.setFromDate(oldest.getTimestamp());
+        report.setToDate(newest.getTimestamp());
+        report.setNormalizedValue(normalizedPrice);
 
-        report.setMaxValue(max.getPrice());
-        report.setMaxValueDate(max.getTimestamp());
-
-        report.setMinValue(min.getPrice());
-        report.setMinValueDate(min.getTimestamp());
-
-        report.setNewestValue(newest.getPrice());
-        report.setNewestValueDate(newest.getTimestamp());
-
-        report.setOldestValue(oldest.getPrice());
-        report.setOldestValueDate(oldest.getTimestamp());
-
-        report.setNormalizedValue(monthlyNormalized);
-
-        report.setReportedMonth(DateUtils.getMonthName(date));
-        report.setCryptoSymbol(symbol);
+        report.setOldestPrice(from(oldest));
+        report.setNewestPrice(from(newest));
+        report.setMaxPrice(from(max));
+        report.setMinPrice(from(min));
 
         return report;
     }
 
-    private List<Crypto> fetchDataForReport(final String symbol, final Date date) {
-        final LocalDateTime localDateTime = DateUtils.getLocalDateTime(date);
-        final LocalDateTime plusMonth = localDateTime.plusMonths(1);
-        return cryptoRepository.findBySymbolBetweenDays(symbol, localDateTime, plusMonth);
-    }
 }

@@ -10,16 +10,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class CryptoDto {
+public class CryptoData {
 
     private LocalDateTime timestamp;
     private String symbol;
 
     private BigDecimal price;
 
-    public static CryptoDto fromCrypto(Crypto crypto) {
-        return new CryptoDto(crypto.getTimestamp(), crypto.getSymbol(), crypto.getPrice());
-
+    public static CryptoData fromCrypto(Crypto crypto) {
+        return new CryptoData(crypto.getTimestamp(), crypto.getSymbol(), crypto.getPrice());
     }
 
 }
