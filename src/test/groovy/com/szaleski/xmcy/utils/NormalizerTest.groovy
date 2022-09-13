@@ -28,4 +28,9 @@ class NormalizerTest extends Specification {
         4      | 2         | 1
         3.1234 | 2.3456789 | 0.3315
     }
+
+    def "No crypto"(){
+        expect:
+        -1 == normalizer.normalize([])
+    }
 }

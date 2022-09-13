@@ -25,9 +25,9 @@ public class DataLoader implements ApplicationRunner {
     @Value("${crypto.initial.data}")
     private String pathToResources;
 
-    private ResourceLoader resourceLoader;
-    private CsvCryptoLoader csvCryptoLoader;
-    private CryptoRepository cryptoRepository;
+    private final ResourceLoader resourceLoader;
+    private final CsvCryptoLoader csvCryptoLoader;
+    private final CryptoRepository cryptoRepository;
 
     public DataLoader(ResourceLoader resourceLoader,
                       CsvCryptoLoader csvCryptoLoader,
@@ -44,7 +44,7 @@ public class DataLoader implements ApplicationRunner {
             LOG.info("Loading {}", file);
             final List<Crypto> cryptos = csvCryptoLoader.readCryptoFromCsv(file.toPath());
             cryptoRepository.saveAllAndFlush(cryptos);
-            cryptos.forEach(c -> System.out.println(c.getTimestamp()));
+            // cryptos.forEach(c -> System.out.println(c.getTimestamp()));
         }
     }
 }

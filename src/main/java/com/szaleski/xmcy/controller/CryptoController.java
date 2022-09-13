@@ -1,61 +1,46 @@
 package com.szaleski.xmcy.controller;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
-import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
-import com.szaleski.xmcy.model.Crypto;
+import com.szaleski.xmcy.model.CryptoReport;
 import com.szaleski.xmcy.service.CryptoService;
-import com.szaleski.xmcy.utils.DateUtils;
+import com.szaleski.xmcy.utils.CryptoReportGenerator;
 
-@RestController
+@Controller
 @RequestMapping("/api/v1/crypto")
 public class CryptoController {
 
-    @Autowired
-    private CryptoService cryptoService;
+    private final CryptoService cryptoService;
+    private final CryptoReportGenerator reportGenerator;
+
+    public CryptoController(CryptoService cryptoService, CryptoReportGenerator cryptoReportGenerator) {
+        this.cryptoService = cryptoService;
+        this.reportGenerator = cryptoReportGenerator;
+    }
 
     @GetMapping(value = "/{symbol}")
-    public List<Crypto> getCryptoBySymbol(@PathVariable String symbol) {
-        return cryptoService.getCryptoBySymbol(symbol);
+    public String getCryptoBySymbol(@PathVariable String symbol, Model model) {
+        model.addAttribute("cryptoSymbol", symbol);
+        model.addAttribute("crypto", cryptoService.getCryptoBySymbol(symbol));
+        return "cryptoData";
     }
 
-    @GetMapping(value = "/{symbol}/max")
-    public Crypto getMaxValueForCrypto(@PathVariable String symbol) {
-        return cryptoService.getMaxValue(symbol);
-    }
+    @GetMapping(value = "/{symbol}/report")
+    public String getCryptoReportBySymbol(@PathVariable String symbol,
+                                          @RequestParam(name = "month") @DateTimeFormat(pattern = "yyyy-MM") Date date,
+                                          Model model) {
+        CryptoReport cryptoReport = reportGenerator.generateReportFor(symbol, date);
+        model.addAttribute("cryptoReport", cryptoReport);
 
-    @GetMapping(value = "/{symbol}/min")
-    public Crypto getMinValueForCrypto(@PathVariable String symbol) {
-        return cryptoService.getMinValue(symbol);
-    }
-
-    @GetMapping(value = "/{symbol}/oldest")
-    public Crypto getOldestValueForCrypto(@PathVariable String symbol) {
-        return cryptoService.getOldest(symbol);
-    }
-
-    @GetMapping(value = "/{symbol}/newest")
-    public Crypto getNewestValueForCrypto(@PathVariable String symbol) {
-        return cryptoService.getNewest(symbol);
-    }
-
-    @GetMapping(value = "/{symbol}/normalized")
-    public BigDecimal getNormalizedValueForCrypto(@PathVariable String symbol, @RequestParam(required = false) Date date) {
-        if(Objects.nonNull(date)) {
-            return cryptoService.getNormalizedForDate(symbol, date);
-        }
-        return cryptoService.getNormalized(symbol);
+        return "cryptoReport";
     }
 
 }

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Data Availability</title>
+
+    <style>
+         table, th, td {
+            border: 1px solid black;
+            border-color: #96D4D4
+         }
+      </style>
+
+</head>
+<body>
+<h1 th:text="${cryptoSymbol}"> Data Availability:</h1>
+<table >
+    <tr>
+        <th>TimeStamp</th>
+        <th>Price</th>
+    </tr>
+    <tr th:each="crypto:${crypto}">
+        <td th:text="${crypto.timestamp}">TimeStamp</td>
+        <td th:text="${crypto.price}">Price</td>
+    </tr>
+</table>
+</body>
+</html>

@@ -1,8 +1,8 @@
 package com.szaleski.xmcy.utils;
 
-import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Component;
 
@@ -22,23 +22,19 @@ public class CryptoFilter {
     }
 
     public Crypto getNewest(List<Crypto> cryptoList) {
-        return cryptoList.parallelStream().max(Comparator.comparing(Crypto::getTimestamp)).get();
+        return cryptoList.parallelStream().max(Comparator.comparing(Crypto::getTimestamp)).orElseThrow(NoSuchElementException::new);
     }
 
     public Crypto getOldest(List<Crypto> cryptoList) {
-        return cryptoList.parallelStream().min(Comparator.comparing(Crypto::getTimestamp)).get();
+        return cryptoList.parallelStream().min(Comparator.comparing(Crypto::getTimestamp)).orElseThrow(NoSuchElementException::new);
     }
 
     public Crypto getMin(List<Crypto> cryptoList) {
-        return cryptoList.parallelStream().min(Comparator.comparing(Crypto::getPrice)).get();
+        return cryptoList.parallelStream().min(Comparator.comparing(Crypto::getPrice)).orElseThrow(NoSuchElementException::new);
     }
 
     public Crypto getMax(List<Crypto> cryptoList) {
-        return cryptoList.parallelStream().max(Comparator.comparing(Crypto::getPrice)).get();
-    }
-
-    public BigDecimal getNormalized(List<Crypto> cryptoList) {
-        return normalizer.normalize(cryptoList);
+        return cryptoList.parallelStream().max(Comparator.comparing(Crypto::getPrice)).orElseThrow(NoSuchElementException::new);
     }
 
 }
