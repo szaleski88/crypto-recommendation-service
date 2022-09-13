@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException;
 import com.szaleski.xmcy.model.Crypto;
 import com.szaleski.xmcy.model.CryptoReport;
 import com.szaleski.xmcy.repository.CryptoRepository;
@@ -27,13 +28,17 @@ public class CryptoReportGenerator {
     public CryptoReport generateReportFor(String symbol, Date date) {
         final List<Crypto> cryptoValuesForMonth = fetchDataForReport(symbol, date);
 
+        if(cryptoValuesForMonth.isEmpty()) {
+            throw CryptoDataNotAvailableException.forSymbolAndDate(symbol, date);
+        }
+
         final Crypto min = cryptoFilter.getMin(cryptoValuesForMonth);
         final Crypto max = cryptoFilter.getMax(cryptoValuesForMonth);
         final Crypto oldest = cryptoFilter.getOldest(cryptoValuesForMonth);
         final Crypto newest = cryptoFilter.getNewest(cryptoValuesForMonth);
         final BigDecimal monthlyNormalized = normalizer.normalize(cryptoValuesForMonth);
-
         final CryptoReport report = new CryptoReport();
+
         report.setMaxValue(max.getPrice());
         report.setMaxValueDate(max.getTimestamp());
 

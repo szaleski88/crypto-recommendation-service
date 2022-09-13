@@ -14,6 +14,10 @@ import lombok.Setter;
 @Setter
 public class CryptoReport {
 
+    private String cryptoSymbol;
+    private String reportedMonth;
+    private BigDecimal normalizedValue;
+
     private BigDecimal maxValue;
     private LocalDateTime maxValueDate;
 
@@ -25,10 +29,5 @@ public class CryptoReport {
 
     private BigDecimal oldestValue;
     private LocalDateTime oldestValueDate;
-
-    private BigDecimal normalizedValue;
-
-    private String cryptoSymbol;
-    private String reportedMonth;
 
 }

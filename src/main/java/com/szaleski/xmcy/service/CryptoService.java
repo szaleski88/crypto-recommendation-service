@@ -20,40 +20,40 @@ import com.szaleski.xmcy.utils.CryptoFilter;
 import com.szaleski.xmcy.utils.DateUtils;
 import com.szaleski.xmcy.utils.Normalizer;
 
+import lombok.AllArgsConstructor;
+
 @Service
+@AllArgsConstructor
 public class CryptoService {
 
     private final CryptoRepository cryptoRepository;
     private final CryptoFilter cryptoFilter;
     private final Normalizer normalizer;
 
-    public CryptoService(CryptoRepository cryptoRepository, CryptoFilter cryptoFilter, Normalizer normalizer) {
-        this.cryptoRepository = cryptoRepository;
-        this.cryptoFilter = cryptoFilter;
-        this.normalizer = normalizer;
-    }
-
     public List<CryptoDto> getCryptoBySymbol(String symbol) {
         List<Crypto> cryptoBySymbol = cryptoRepository.findBySymbol(symbol);
+        if(cryptoBySymbol.isEmpty()) {
+            throw UnknownCryptoSymbolException.forSymbol(symbol);
+        }
         return cryptoBySymbol.stream()
                              .map(CryptoDto::fromCrypto)
                              .sorted(Comparator.comparing(CryptoDto::getTimestamp))
                              .collect(Collectors.toList());
     }
 
-    public Crypto getMaxValue(String symbol) {
+    public CryptoDto getMaxValue(String symbol) {
         return getCryptoOrThrow(symbol, cryptoFilter::getMax);
     }
 
-    public Crypto getMinValue(String symbol) {
+    public CryptoDto getMinValue(String symbol) {
         return getCryptoOrThrow(symbol, cryptoFilter::getMin);
     }
 
-    public Crypto getNewest(String symbol) {
+    public CryptoDto getNewest(String symbol) {
         return getCryptoOrThrow(symbol, cryptoFilter::getNewest);
     }
 
-    public Crypto getOldest(String symbol) {
+    public CryptoDto getOldest(String symbol) {
         return getCryptoOrThrow(symbol, cryptoFilter::getOldest);
     }
 
@@ -67,10 +67,11 @@ public class CryptoService {
         return normalizer.normalize(cryptoValuesForDate);
     }
 
-    private Crypto getCryptoOrThrow(String symbol, Function<List<Crypto>, Crypto> filteringFunction) {
+    private CryptoDto getCryptoOrThrow(String symbol, Function<List<Crypto>, Crypto> filteringFunction) {
         try {
             List<Crypto> cryptoBySymbol = cryptoRepository.findBySymbol(symbol);
-            return filteringFunction.apply(cryptoBySymbol);
+            Crypto crypto = filteringFunction.apply(cryptoBySymbol);
+            return CryptoDto.fromCrypto(crypto);
         } catch (NoSuchElementException ex) {
             throw UnknownCryptoSymbolException.forSymbol(symbol);
         }

@@ -15,7 +15,7 @@ import com.szaleski.xmcy.service.CryptoService;
 import com.szaleski.xmcy.utils.CryptoReportGenerator;
 
 @Controller
-@RequestMapping("/api/v1/crypto")
+@RequestMapping("/crypto/")
 public class CryptoController {
 
     private final CryptoService cryptoService;
