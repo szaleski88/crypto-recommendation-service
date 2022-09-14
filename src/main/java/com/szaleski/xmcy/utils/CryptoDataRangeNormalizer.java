@@ -3,6 +3,7 @@ package com.szaleski.xmcy.utils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.szaleski.xmcy.model.CryptoData;
+import com.szaleski.xmcy.model.HighestNormalizedRange;
+import com.szaleski.xmcy.model.NormalizedRanges;
 
 @Component
 public class CryptoDataRangeNormalizer {
@@ -37,14 +40,24 @@ public class CryptoDataRangeNormalizer {
         return maxPrice.subtract(minPrice).divide(minPrice, 4, RoundingMode.FLOOR);
     }
 
-    public LinkedHashMap<String, BigDecimal> getNormalizedRanges(List<CryptoData> cryptoData) {
+    public NormalizedRanges getNormalizedRanges(List<CryptoData> cryptoData) {
         Map<String, List<CryptoData>> cryptosBySymbol = cryptoData.parallelStream().collect(Collectors.groupingBy(CryptoData::getSymbol));
 
-        return cryptosBySymbol.entrySet().stream()
-                              .map(entry -> Map.entry(entry.getKey(), getSingleNormalizedRange(entry.getValue())))
-                              .sorted(COMPARATOR)
-                              .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                                                        (v1, v2) -> v2,
-                                                        LinkedHashMap::new));
+        final LinkedHashMap<String, BigDecimal> normalizedRangesByCryptoSymbol = cryptosBySymbol.entrySet().stream()
+                                                                         .map(entry -> Map.entry(entry.getKey(), getSingleNormalizedRange(entry.getValue())))
+                                                                         .sorted(COMPARATOR)
+                                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                                                                                                   (v1, v2) -> v2,
+                                                                                                   LinkedHashMap::new));
+        return new NormalizedRanges(normalizedRangesByCryptoSymbol);
+    }
+
+    public HighestNormalizedRange getHighestNormalizedRange(List<CryptoData> cryptoData, Date date) {
+        NormalizedRanges normalizedRanges = getNormalizedRanges(cryptoData);
+        Map.Entry<String, BigDecimal> currencyWithHighestNormalizedRange = normalizedRanges.getNormalizedRanges().entrySet().iterator().next();
+
+        return new HighestNormalizedRange(currencyWithHighestNormalizedRange.getKey(),
+                                          currencyWithHighestNormalizedRange.getValue(),
+                                          DateUtils.toLocalDateTime(date));
     }
 }

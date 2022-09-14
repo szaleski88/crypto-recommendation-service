@@ -1,12 +1,19 @@
 package com.szaleski.xmcy.service
 
+import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException
 import com.szaleski.xmcy.exceptions.UnknownCryptoSymbolException
 import com.szaleski.xmcy.model.Crypto
 import com.szaleski.xmcy.model.CryptoData
 import com.szaleski.xmcy.repository.CryptoRepository
 import com.szaleski.xmcy.utils.CryptoDataRangeNormalizer
+import com.szaleski.xmcy.utils.DateUtils
+import org.checkerframework.checker.units.qual.A
 import spock.lang.Shared
 import spock.lang.Specification
+
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 import static java.time.LocalDateTime.of
 
@@ -40,7 +47,7 @@ class CryptoServiceTest extends Specification {
         CryptoRepository repositoryMock = Mock(CryptoRepository) {
             it.findBySymbol(_) >> []
         }
-        CryptoService cryptoService = new CryptoService( repositoryMock, new CryptoDataRangeNormalizer())
+        CryptoService cryptoService = new CryptoService(repositoryMock, new CryptoDataRangeNormalizer())
 
         when:
         cryptoService.getCryptoBySymbol(SYMBOL_A)
@@ -54,36 +61,64 @@ class CryptoServiceTest extends Specification {
     }
 
     def "GetHighestNormalizedRangeForDay"() {
-        expect:
-        true
+        given:
+        Date date = new Date()
+
+        when:
+        cryptoService.getHighestNormalizedRangeForDay(date)
+
+        then:
+        CryptoDataNotAvailableException exc = thrown()
+        with(exc) {
+            it.getDate() == date
+        }
     }
 
     def "GetNormalizedRangesForAll"() {
-        expect:
-        true
+        when:
+        cryptoService.getNormalizedRangesForAll()
+
+        then:
+        CryptoDataNotAvailableException exc = thrown()
+        with(exc) {
+            it.getMessage().contains("No data available")
+        }
     }
 
     def "GetCryptoDataBySymbolForMonth"() {
-        expect:
-        true
+        given:
+        Date date = new Date()
 
+        when:
+        List<CryptoData> result = cryptoService.getCryptoDataBySymbolForMonth(SYMBOL_A, date)
+
+        then:
+        result ==~ [NEW_BIG_D]
     }
 
-    def "GetCryptoDataBySymbolForRange"() {
-        expect:
-        true
+    def "GetCryptoDataBySymbolForRange when newer before older"() {
+        given:
+        Date newerDate = Date.from(NEW_BIG.getTimestamp().atZone(ZoneId.systemDefault()).toInstant())
+        Date olderDate = Date.from(NEW_BIG.getTimestamp().atZone(ZoneId.systemDefault()).toInstant())
+
+        when:
+        List<CryptoData> range = cryptoService.getCryptoDataBySymbolForRange(SYMBOL_A, newerDate, olderDate)
+
+        then:
+        range ==~ [NEW_BIG_D]
     }
 
     def "GetAvailableCryptos"() {
         expect:
-        true
+        cryptoService.getAvailableCryptos() ==~ ["A", "B", "C"]
     }
 
     private CryptoRepository getCryptoRepositoryMock() {
         return Mock(CryptoRepository) {
+            it.findAll() >> []
             it.findBetweenDays(_, _) >> []
             it.findBySymbol(_) >> [OLD_SMALL, NEW_BIG]
-            it.findBySymbolBetweenDays(_, _, _) >> []
+            it.findBySymbolBetweenDays(_, _, _) >> [NEW_BIG]
             it.findDistinctSymbols() >> ["A", "B", "C"]
         }
     }

@@ -25,7 +25,7 @@ class CryptoDataRangeNormalizerTest extends Specification {
         3.1234 | 2.3456789 | 0.3315
     }
 
-    def "Data normalization for multiple currencies" () {
+    def "Data normalization for multiple currencies"() {
         given:
         def cryptoA1 = getMockWithSymbolAndPrice("A", 1)
         def cryptoA2 = getMockWithSymbolAndPrice("A", 2)
@@ -38,12 +38,29 @@ class CryptoDataRangeNormalizerTest extends Specification {
         def result = normalizer.getNormalizedRanges(cryptoData)
 
         then:
-        result.get("A") == 1
-        result.get("B") == 1
-        result.get("C") == 0
+        def ranges = result.getNormalizedRanges()
+
+        ranges.get("A") == 1
+        ranges.get("B") == 1
+        ranges.get("C") == 0
     }
 
-    def "No crypto"(){
+    def "Get Highest normalized Range" () {
+        given:
+        def cryptoA1 = getMockWithSymbolAndPrice("A", 1)
+        def cryptoA2 = getMockWithSymbolAndPrice("A", 2)
+        def cryptoB = getMockWithSymbolAndPrice("B", 7)
+
+        def cryptoData = [cryptoA1, cryptoA2, cryptoB]
+        when:
+        def result = normalizer.getHighestNormalizedRange(cryptoData, new Date())
+
+        then:
+        result.getCurrency() == "A"
+        result.getNormalizedRange() == 1
+    }
+
+    def "No crypto"() {
         when:
         normalizer.getSingleNormalizedRange([])
 

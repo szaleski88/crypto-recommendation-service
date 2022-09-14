@@ -1,12 +1,9 @@
 package com.szaleski.xmcy.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -44,12 +41,7 @@ public class CryptoService {
 
     public HighestNormalizedRange getHighestNormalizedRangeForDay(Date date) {
         List<CryptoData> cryptoData = getCryptoDataForDay(date);
-        LinkedHashMap<String, BigDecimal> normalizedRanges = cryptoDataRangeNormalizer.getNormalizedRanges(cryptoData);
-        Map.Entry<String, BigDecimal> currencyWithHighestNormalizedRange = normalizedRanges.entrySet().iterator().next();
-
-        return new HighestNormalizedRange(currencyWithHighestNormalizedRange.getKey(),
-                                          currencyWithHighestNormalizedRange.getValue(),
-                                          DateUtils.toLocalDateTime(date));
+        return cryptoDataRangeNormalizer.getHighestNormalizedRange(cryptoData, date);
     }
 
     public NormalizedRanges getNormalizedRangesForAll() {
@@ -62,7 +54,7 @@ public class CryptoService {
         List<CryptoData> cryptoData = allCryptoData.stream()
                                                    .map(CryptoData::fromCrypto)
                                                    .collect(Collectors.toList());
-        return new NormalizedRanges(cryptoDataRangeNormalizer.getNormalizedRanges(cryptoData));
+        return cryptoDataRangeNormalizer.getNormalizedRanges(cryptoData);
     }
 
     public List<CryptoData> getCryptoDataBySymbolForMonth(String symbol, Date date) {
