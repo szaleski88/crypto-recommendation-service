@@ -1,34 +1,66 @@
 package com.szaleski.xmcy.utils
 
-import com.szaleski.xmcy.model.Crypto
 import com.szaleski.xmcy.model.CryptoData
 import spock.lang.Specification
 
-import java.time.LocalDateTime
+import static java.time.LocalDateTime.of
 
 class CryptoFilterTest extends Specification {
 
-    private static CryptoData cryptoA = new CryptoData( LocalDateTime.of(2022, 01, 01, 00, 00), "aaa", BigDecimal.ONE)
-    private static CryptoData cryptoB = new CryptoData( LocalDateTime.of(2022, 12, 01, 00, 00), "aaa", BigDecimal.TEN)
+    private static CryptoData olderSmaller = new CryptoData(of(2022, 01, 01, 00, 00), "aaa", BigDecimal.ONE)
+    private static CryptoData newerBigger = new CryptoData(of(2023, 01, 01, 00, 00), "aaa", BigDecimal.TEN)
     private static CryptoFilter cryptoFilter = new CryptoFilter()
 
-    def "GetNewest"() {
+    def "GetNewest returns newer cryptoData"() {
         expect:
-        cryptoB === cryptoFilter.getNewest([cryptoA, cryptoB])
+        newerBigger === cryptoFilter.getNewest([olderSmaller, newerBigger])
     }
 
-    def "GetOldest"() {
+    def "GetOldest returns older cryptoData"() {
         expect:
-        cryptoA === cryptoFilter.getOldest([cryptoA, cryptoB])
+        olderSmaller === cryptoFilter.getOldest([olderSmaller, newerBigger])
     }
 
-    def "GetMin"() {
+    def "GetMin returns smaller cryptoData"() {
         expect:
-        cryptoA === cryptoFilter.getMin([cryptoA, cryptoB])
+        olderSmaller === cryptoFilter.getMin([olderSmaller, newerBigger])
     }
 
-    def "GetMax"() {
+    def "GetMax returns bigger cryptoData"() {
         expect:
-        cryptoB === cryptoFilter.getMax([cryptoA, cryptoB])
+        newerBigger === cryptoFilter.getMax([olderSmaller, newerBigger])
     }
+
+    def "Thrown on empty MAX"() {
+        when:
+        cryptoFilter.getMax([])
+
+        then:
+        thrown NoSuchElementException
+    }
+
+    def "Thrown on empty MIN"() {
+        when:
+        cryptoFilter.getMin([])
+
+        then:
+        thrown NoSuchElementException
+    }
+
+    def "Thrown on empty OLDEST"() {
+        when:
+        cryptoFilter.getOldest([])
+
+        then:
+        thrown NoSuchElementException
+    }
+
+    def "Thrown on empty NEWEST"() {
+        when:
+        cryptoFilter.getNewest([])
+
+        then:
+        thrown NoSuchElementException
+    }
+
 }

@@ -21,7 +21,8 @@ public class CsvCryptoLoader {
         List<Crypto> cryptos = new ArrayList<>();
 
         try (BufferedReader br = Files.newBufferedReader(pathToFile, StandardCharsets.US_ASCII)) {
-            br.readLine();
+            br.readLine(); // skip the header
+
             String line = br.readLine();
             while (line != null) {
                 String[] attributes = line.split(",");
@@ -36,7 +37,7 @@ public class CsvCryptoLoader {
     }
 
     private static Crypto toCryptoDto(String[] metadata) {
-        return new Crypto(DateUtils.getLocalDateTime(metadata[0]), metadata[1], new BigDecimal(metadata[2]));
+        return new Crypto(DateUtils.strMillisToLocalDateTime(metadata[0]), metadata[1], new BigDecimal(metadata[2]));
     }
 
 }

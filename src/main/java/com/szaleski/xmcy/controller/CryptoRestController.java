@@ -1,8 +1,6 @@
 package com.szaleski.xmcy.controller;
 
-import java.math.BigDecimal;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -13,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException;
 import com.szaleski.xmcy.model.CryptoData;
 import com.szaleski.xmcy.model.CryptoReport;
 import com.szaleski.xmcy.model.HighestNormalizedRange;
@@ -22,9 +21,6 @@ import com.szaleski.xmcy.utils.CryptoReportGenerator;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -34,8 +30,6 @@ public class CryptoRestController {
 
     private CryptoService cryptoService;
     private CryptoReportGenerator reportGenerator;
-
-
 
     @Operation(summary = "Get report of given crypto")
     @GetMapping(value = "/{currencySymbol}/report")
@@ -55,7 +49,7 @@ public class CryptoRestController {
     @Operation(summary = "Get normalized ranges of all available currencies")
     @GetMapping(value = "/normalizedRanges")
     public NormalizedRanges getNormalizedRangeForAll() {
-        return cryptoService.getNormalizedRanges();
+        return cryptoService.getNormalizedRangesForAll();
     }
 
     @Operation(summary = "Get NORMALIZED value of given crypto for given day")

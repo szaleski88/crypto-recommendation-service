@@ -41,7 +41,7 @@ public class DataLoader implements ApplicationRunner {
         final File path = resourceLoader.getResource(pathToResources).getFile();
 
         for (final File file : Objects.requireNonNull(path.listFiles())) {
-            LOG.info("Loading {}", file);
+            LOG.info("Loading currency data from: {}", file.getName());
             final List<Crypto> cryptos = csvCryptoLoader.readCryptoFromCsv(file.toPath());
             cryptoRepository.saveAllAndFlush(cryptos);
             // cryptos.forEach(c -> System.out.println(c.getTimestamp()));

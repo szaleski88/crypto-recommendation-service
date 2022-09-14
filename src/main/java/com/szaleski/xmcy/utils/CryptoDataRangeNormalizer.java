@@ -1,11 +1,8 @@
 package com.szaleski.xmcy.utils;
 
-import static com.szaleski.xmcy.utils.DateUtils.getLocalDateTime;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +12,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.szaleski.xmcy.model.CryptoData;
-import com.szaleski.xmcy.model.HighestNormalizedRange;
 
 @Component
 public class CryptoDataRangeNormalizer {

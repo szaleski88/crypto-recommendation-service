@@ -14,12 +14,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CryptoFilter {
 
-    private final CryptoDataRangeNormalizer cryptoDataRangeNormalizer;
-
-    public CryptoFilter() {
-        this.cryptoDataRangeNormalizer = new CryptoDataRangeNormalizer();
-    }
-
     public CryptoData getNewest(List<CryptoData> cryptoList) {
         return cryptoList.parallelStream().max(Comparator.comparing(CryptoData::getTimestamp)).orElseThrow(NoSuchElementException::new);
     }

@@ -13,18 +13,16 @@ import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException;
 import com.szaleski.xmcy.model.CryptoData;
 import com.szaleski.xmcy.model.CryptoReport;
 
+import lombok.AllArgsConstructor;
+
 @Component
+@AllArgsConstructor
 public class CryptoReportGenerator {
 
     private final CryptoFilter cryptoFilter;
     private final CryptoDataRangeNormalizer cryptoDataRangeNormalizer;
 
-    public CryptoReportGenerator(CryptoFilter cryptoFilter, CryptoDataRangeNormalizer cryptoDataRangeNormalizer) {
-        this.cryptoFilter = cryptoFilter;
-        this.cryptoDataRangeNormalizer = cryptoDataRangeNormalizer;
-    }
-
-    public CryptoReport generateReportFor(String symbol, List<CryptoData> dataForReport, @Nullable Date date) {
+    public CryptoReport generateReportFor(String symbol, List<CryptoData> dataForReport, Date date) {
         if (dataForReport.isEmpty()) {
             throw CryptoDataNotAvailableException.forSymbolAndDate(symbol, date);
         }
@@ -34,7 +32,9 @@ public class CryptoReportGenerator {
         final CryptoData oldest = cryptoFilter.getOldest(dataForReport);
         final CryptoData newest = cryptoFilter.getNewest(dataForReport);
         final BigDecimal normalizedPrice = cryptoDataRangeNormalizer.getSingleNormalizedRange(dataForReport);
+
         final CryptoReport report = new CryptoReport();
+
         report.setCurrency(symbol);
         report.setFromDate(oldest.getTimestamp());
         report.setToDate(newest.getTimestamp());
