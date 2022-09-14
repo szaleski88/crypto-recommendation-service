@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Data Availability</title>
+
+    <style>
+         table, th, td {
+            border: 1px solid black;
+            border-color: #96D4D4
+         }
+      </style>
+
+</head>
+<body>
+<h1>Available currencies:</h1>
+<br>
+<table >
+    <tr>
+        <th>Currency symbol</th>
+    </tr>
+    <tr th:each="symbol:${cryptos}">
+        <td>
+            <a th:href="@{/crypto/{currencySymbol}(currencySymbol=${symbol})}" th:text="${symbol}">Currency symbol</a>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

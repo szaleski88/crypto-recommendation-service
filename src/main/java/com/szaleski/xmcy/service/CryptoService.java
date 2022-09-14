@@ -86,4 +86,8 @@ public class CryptoService {
                                   .map(CryptoData::fromCrypto)
                                   .collect(Collectors.toList());
     }
+
+    public List<String> getAvailableCryptos() {
+        return cryptoRepository.findDistinctSymbols().stream().sorted().collect(Collectors.toList());
+    }
 }

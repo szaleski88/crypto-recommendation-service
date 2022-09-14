@@ -11,13 +11,24 @@ import com.szaleski.xmcy.service.CryptoService;
 import lombok.AllArgsConstructor;
 
 @Controller
-@RequestMapping("/crypto/")
+@RequestMapping("/")
 @AllArgsConstructor
-public class CryptoController {
+public class BaseController {
 
     private final CryptoService cryptoService;
 
-    @GetMapping(value = "/{symbol}")
+    @GetMapping
+    public String helloPage() {
+        return "index";
+    }
+
+    @GetMapping("/crypto")
+    public String getAvailableCryptos(Model model) {
+        model.addAttribute("cryptos", cryptoService.getAvailableCryptos());
+        return "cryptoList";
+    }
+
+    @GetMapping(value = "/crypto/{symbol}")
     public String getCryptoBySymbol(@PathVariable String symbol, Model model) {
         model.addAttribute("cryptoSymbol", symbol);
         model.addAttribute("crypto", cryptoService.getCryptoBySymbol(symbol));
