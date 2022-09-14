@@ -1,5 +1,7 @@
 spring:
-  profiles: dev
+  config:
+    activate:
+      on-profile: dev
   datasource:
     url: jdbc:h2:mem:cryptoDB
 
@@ -11,7 +13,9 @@ crypto:
 
 ---
 spring:
-  profiles: prod
+  config:
+    activate:
+      on-profile: prod
   datasource:
     url: jdbc:h2:mem:cryptoDB
     password: admin
@@ -28,14 +32,31 @@ spring:
   h2:
     console:
       enabled: true
-  datasource:
-    url: jdbc:h2:mem:testdb
   jpa:
     hibernate:
       ddl-auto: none
   mvc:
     format:
       date: yyyy-MM-dd
+  cache:
+    cache-names:
+      - rate-limit-buckets
+    caffeine:
+      spec: maximumSize=2,expireAfterAccess=3600s
+
+bucket4j:
+  enabled: true
+  filters:
+    - cache-name: rate-limit-buckets
+      url: .*
+      http-response-body: "{ \"status\": 429, \"error\": \"Too Many Requests. Rate-limit set to 1 per 3seconds\", \"message\": \"You have exhausted your API Request Quota\" }"
+      rate-limits:
+        - expression: "getRemoteAddr()"
+          bandwidths:
+            - capacity: 1
+              time: 3
+              unit: seconds
+
 
 springdoc:
     api-docs:
