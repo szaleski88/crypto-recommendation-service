@@ -1,6 +1,6 @@
 package com.szaleski.xmcy.utils
 
-import com.szaleski.xmcy.model.Crypto
+import com.szaleski.xmcy.model.CryptoData
 import spock.lang.Specification
 
 class CryptoDataRangeNormalizerTest extends Specification {
@@ -10,10 +10,10 @@ class CryptoDataRangeNormalizerTest extends Specification {
     def "Crypto price properly normalized"() {
         given:
 
-        def cryptoA = Mock(Crypto) {
+        def cryptoA = Mock(CryptoData) {
             it.getPrice() >> min
         }
-        def cryptoB = Mock(Crypto) {
+        def cryptoB = Mock(CryptoData) {
             it.getPrice() >> max
         }
         when:
@@ -30,7 +30,10 @@ class CryptoDataRangeNormalizerTest extends Specification {
     }
 
     def "No crypto"(){
-        expect:
-        -1 == normalizer.getSingleNormalizedRange([])
+        when:
+        normalizer.getSingleNormalizedRange([])
+
+        then:
+        thrown NoSuchElementException
     }
 }
