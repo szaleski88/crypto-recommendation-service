@@ -19,6 +19,7 @@ import com.szaleski.xmcy.model.NormalizedRanges;
 import com.szaleski.xmcy.service.CryptoService;
 import com.szaleski.xmcy.utils.CryptoReportGenerator;
 
+import io.github.bucket4j.Bucket;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ import com.szaleski.xmcy.model.Crypto;
 import com.szaleski.xmcy.repository.CryptoRepository;
 
 @Component
+@Profile("dev")
 public class DataLoader implements ApplicationRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataLoader.class);
