@@ -53,22 +53,34 @@ public class CryptoService {
     }
 
     public NormalizedRanges getNormalizedRangesForAll() {
-        final List<Crypto> allCryptoData = cryptoRepository.findAll();
+        List<Crypto> allCryptoData = cryptoRepository.findAll();
 
         if (allCryptoData.isEmpty()) {
             throw new CryptoDataNotAvailableException("No data available.");
         }
 
-        final List<CryptoData> cryptoData = allCryptoData.stream()
-                                                         .map(CryptoData::fromCrypto)
-                                                         .collect(Collectors.toList());
+        List<CryptoData> cryptoData = allCryptoData.stream()
+                                                   .map(CryptoData::fromCrypto)
+                                                   .collect(Collectors.toList());
         return new NormalizedRanges(cryptoDataRangeNormalizer.getNormalizedRanges(cryptoData));
     }
 
     public List<CryptoData> getCryptoDataBySymbolForMonth(String symbol, Date date) {
-        final LocalDateTime localDateTime = DateUtils.toLocalDateTime(date);
-        final LocalDateTime plusMonth = localDateTime.plusMonths(1);
-        final List<Crypto> bySymbolBetweenDays = cryptoRepository.findBySymbolBetweenDays(symbol, localDateTime, plusMonth);
+        LocalDateTime localDateTime = DateUtils.toLocalDateTime(date);
+        LocalDateTime plusMonth = localDateTime.plusMonths(1);
+        List<Crypto> bySymbolBetweenDays = cryptoRepository.findBySymbolBetweenDays(symbol, localDateTime, plusMonth);
+
+        return bySymbolBetweenDays.stream().map(CryptoData::fromCrypto).collect(Collectors.toList());
+    }
+
+    public List<CryptoData> getCryptoDataBySymbolForRange(String symbol, Date dateFrom, Date dateTo) {
+        LocalDateTime from = DateUtils.toLocalDateTime(dateFrom);
+        LocalDateTime to = DateUtils.toLocalDateTime(dateTo).plusDays(1);
+
+        LocalDateTime realFrom = from.isBefore(to) ? from : to;
+        LocalDateTime realTo = to.isAfter(from) ? to : from;
+
+        List<Crypto> bySymbolBetweenDays = cryptoRepository.findBySymbolBetweenDays(symbol, realFrom, realTo);
 
         return bySymbolBetweenDays.stream().map(CryptoData::fromCrypto).collect(Collectors.toList());
     }
@@ -78,9 +90,9 @@ public class CryptoService {
     }
 
     private List<CryptoData> getCryptoDataForDay(Date date) {
-        final LocalDateTime fromDay = DateUtils.toLocalDateTime(date);
-        final LocalDateTime toDay = fromDay.plusDays(1);
-        final List<Crypto> cryptoValuesForDate = cryptoRepository.findBetweenDays(fromDay, toDay);
+        LocalDateTime fromDay = DateUtils.toLocalDateTime(date);
+        LocalDateTime toDay = fromDay.plusDays(1);
+        List<Crypto> cryptoValuesForDate = cryptoRepository.findBetweenDays(fromDay, toDay);
 
         if (cryptoValuesForDate.isEmpty()) {
             throw CryptoDataNotAvailableException.forDate(date);

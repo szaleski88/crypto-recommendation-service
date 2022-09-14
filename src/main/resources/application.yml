@@ -53,9 +53,9 @@ bucket4j:
       rate-limits:
         - expression: "getRemoteAddr()"
           bandwidths:
-            - capacity: 1
-              time: 3
-              unit: seconds
+            - capacity: 20
+              time: 1
+              unit: minutes
 
 
 springdoc:
