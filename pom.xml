@@ -81,13 +81,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.security</groupId>-->
-<!--			<artifactId>spring-security-test</artifactId>-->
-<!--			<scope>test</scope>-->
-<!--		</dependency>-->
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -109,29 +103,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>com.google.cloud.tools</groupId>
-				<artifactId>jib-maven-plugin</artifactId>
-				<version>2.5.0</version>
-				<configuration>
-					<from>
-						<image>openjdk:11-jdk-slim</image>
-					</from>
-
-					<to>
-						<image>hub.docker.com/szaleski88/crypto-recommendation-service</image>
-						<tags>
-							<tag>${project.version}</tag>
-						</tags>
-					</to>
-					<container>
-						<mainClass>com.szaleski.xmcy.CryptoRecommendationApplication</mainClass>
-						<ports>
-							<port>8080</port>
-						</ports>
-					</container>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

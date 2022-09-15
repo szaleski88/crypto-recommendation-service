@@ -18,7 +18,7 @@
 <br>
 <div th:if="${@environment.getActiveProfiles()[0] == 'dev'}">
     <h2>[DEV PROFILE ACTIVE]</h2>
-    <h3><a href="'http://localhost:' + ${@environment.getProperty('server.port')} + '/crypto' ">List of available currencies (just for demo purposes)</a></h3>
+    <h3><a th:href="'http://localhost:' + ${@environment.getProperty('server.port')} + '/crypto'">List of available currencies (just for demo purposes)</a></h3>
 </div>
 </body>
 </html>

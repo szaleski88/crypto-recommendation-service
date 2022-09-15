@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException;
 import com.szaleski.xmcy.model.CryptoData;
 import com.szaleski.xmcy.model.CryptoReport;
 import com.szaleski.xmcy.model.HighestNormalizedRange;
@@ -22,7 +20,6 @@ import com.szaleski.xmcy.model.NormalizedRanges;
 import com.szaleski.xmcy.service.CryptoService;
 import com.szaleski.xmcy.utils.CryptoReportGenerator;
 
-import io.github.bucket4j.Bucket;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
@@ -78,7 +75,7 @@ public class CryptoRestController {
     @GetMapping(value = "/highestNormalizedRange/{date}")
     public HighestNormalizedRange getHighestNormalizedRangeForDay(@Parameter(example = "2022-01-01")
                                                                   @PathVariable(name = "date")
-                                                                  @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
+                                                                  @DateTimeFormat(pattern = "yyyy-MM-dd") @Valid Date date) {
         return cryptoService.getHighestNormalizedRangeForDay(date);
     }
 

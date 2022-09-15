@@ -5,12 +5,11 @@ spring:
   datasource:
     url: jdbc:h2:mem:cryptoDB
 
-server:
-  port: 8080
 crypto:
   initial:
-    data: classpath:initial_data
-
+    data: classpath\\initial_data
+server:
+  port: 8080
 ---
 spring:
   config:
@@ -21,12 +20,14 @@ spring:
     password: admin
     username: admin
 server:
-  port: 9000
-
+  port: 8080
 ---
 logging:
   level:
     org.springframework.jdbc.datasource.init.ScriptUtils: debug
+
+server:
+  port: 8080
 
 spring:
   h2:
@@ -49,7 +50,7 @@ bucket4j:
   filters:
     - cache-name: rate-limit-buckets
       url: .*
-      http-response-body: "{ \"status\": 429, \"error\": \"Too Many Requests. Rate-limit set to 1 per 3seconds\", \"message\": \"You have exhausted your API Request Quota\" }"
+      http-response-body: "{ \"status\": 429, \"error\": \"Too Many Requests. Rate-limit set to 20 per 1 minute\", \"message\": \"You have exhausted your API Request Quota\" }"
       rate-limits:
         - expression: "getRemoteAddr()"
           bandwidths:

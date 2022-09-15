@@ -2,6 +2,8 @@ package com.szaleski.xmcy.loader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,10 +19,10 @@ import com.szaleski.xmcy.utils.DateUtils;
 @Component
 public class CsvCryptoLoader {
 
-    public List<Crypto> readCryptoFromCsv(Path pathToFile) {
+    public List<Crypto> readCryptoFromCsv(InputStream inputStream) {
         List<Crypto> cryptos = new ArrayList<>();
 
-        try (BufferedReader br = Files.newBufferedReader(pathToFile, StandardCharsets.US_ASCII)) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.US_ASCII))) {
             br.readLine(); // skip the header
 
             String line = br.readLine();
