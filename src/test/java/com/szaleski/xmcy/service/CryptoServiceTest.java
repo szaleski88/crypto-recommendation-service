@@ -2,20 +2,21 @@ package com.szaleski.xmcy.service;
 
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.transaction.Transactional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -35,36 +36,33 @@ class CryptoServiceTest {
 
     public static final LocalDate JANUARY = LocalDate.of(2022, 1, 1);
     public static final LocalDate FEBRUARY = LocalDate.of(2022, 2, 1);
-    public static final LocalDate MARCH = LocalDate.of(2022, 3, 1);
     public static final Crypto CRYPTO_JAN1 = new Crypto(null, JANUARY.atTime(LocalTime.NOON), symbolFromMonth(JANUARY), BigDecimal.ONE);
     public static final Crypto CRYPTO_JAN2 = new Crypto(null, JANUARY.atTime(LocalTime.NOON).plusDays(1), symbolFromMonth(JANUARY), BigDecimal.TEN);
     public static final Crypto CRYPTO_FEB = new Crypto(null, FEBRUARY.atTime(LocalTime.NOON), symbolFromMonth(FEBRUARY), BigDecimal.TEN);
-    public static final Crypto CRYPTO_MAR = new Crypto(null, MARCH.atTime(LocalTime.NOON), symbolFromMonth(MARCH), BigDecimal.ZERO);
 
     @Autowired
     CryptoService cryptoService;
 
-    @Autowired
+    @MockBean
     CryptoRepository cryptoRepository;
-
-    @BeforeEach
-    public void setUp() {
-        cryptoRepository.saveAll(List.of(CRYPTO_JAN1, CRYPTO_JAN2, CRYPTO_FEB, CRYPTO_MAR));
-    }
 
     @Test
     public void getCryptoBySymbol() {
+        // given
+        given(cryptoRepository.findBySymbol("A")).willReturn(List.of(CRYPTO_JAN1, CRYPTO_JAN2));
+
         // when
-        List<CryptoData> result = cryptoService.getCryptoBySymbol(symbolFromMonth(JANUARY));
+        List<CryptoData> result = cryptoService.getCryptoBySymbol("A");
 
         // then
-        // ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        // verify(cryptoRepository).findBySymbol(argument.capture());
-        // then(argument.getValue()).isEqualTo("JANUARY");
+        then(result).containsExactlyInAnyOrder(CryptoData.fromCrypto(CRYPTO_JAN1), CryptoData.fromCrypto(CRYPTO_JAN2));
     }
 
     @Test
     public void getCryptoBySymbolThrowsOnNonExistingSymbol() {
+        // given
+        given(cryptoRepository.findBySymbol(anyString())).willReturn(List.of());
+
         // when
         Throwable throwable = catchThrowable(() -> cryptoService.getCryptoBySymbol("NON_EXISTING"));
 
@@ -74,72 +72,118 @@ class CryptoServiceTest {
 
     @Test
     public void availableCryptosReturnedInOrder() {
+        // given
+        given(cryptoRepository.findDistinctSymbols()).willReturn(List.of("A", "Z", "D"));
+
         // when
         List<String> availableCryptos = cryptoService.getAvailableCryptos();
 
         // then
-        then(availableCryptos).containsExactly("FEBRUARY", "JANUARY", "MARCH");
+        then(availableCryptos).containsExactly("A", "D", "Z");
     }
 
     @Test
     public void monthlyDataForCryptoReturned() {
+        // given
+        given(cryptoRepository.findBySymbolBetweenDays(anyString(), any(LocalDateTime.class), any(LocalDateTime.class))).willReturn(
+            List.of(CRYPTO_JAN1, CRYPTO_JAN2));
+
         // when
-        List<CryptoData> result = cryptoService.getCryptoDataBySymbolForMonth(symbolFromMonth(JANUARY), JANUARY);
+        List<CryptoData> result = cryptoService.getCryptoDataBySymbolForMonth("A", JANUARY);
 
         // then
+        LocalDateTime beginningOfJanuary = JANUARY.atStartOfDay();
+        LocalDateTime endOfJanuary = FEBRUARY.minusDays(1).atTime(LocalTime.MAX);
+
+        verify(cryptoRepository).findBySymbolBetweenDays("A", beginningOfJanuary, endOfJanuary);
         then(result).containsExactlyInAnyOrder(CryptoData.fromCrypto(CRYPTO_JAN1), CryptoData.fromCrypto(CRYPTO_JAN2));
     }
 
     @Test
     public void emptyDataForNonExistingSymbol() {
+        // given
+        given(cryptoRepository.findBySymbolBetweenDays(anyString(), any(LocalDateTime.class), any(LocalDateTime.class))).willReturn(List.of());
+
         // when
         List<CryptoData> result = cryptoService.getCryptoDataBySymbolForMonth("NON_EXISTING", JANUARY);
 
         // then
-        then(result).isEmpty();
-    }
+        LocalDateTime beginningOfJanuary = JANUARY.atStartOfDay();
+        LocalDateTime endOfJanuary = FEBRUARY.minusDays(1).atTime(LocalTime.MAX);
 
-    @Test
-    public void noResultForEmptyMonth() {
-        // when
-        List<CryptoData> result = cryptoService.getCryptoDataBySymbolForMonth(symbolFromMonth(JANUARY), JANUARY.plusYears(1000));
-
-        // then
+        verify(cryptoRepository).findBySymbolBetweenDays("NON_EXISTING", beginningOfJanuary, endOfJanuary);
         then(result).isEmpty();
     }
 
     @Test
     public void dataForRangeIsReturned() {
+        // given
+        given(cryptoRepository.findBySymbolBetweenDays(anyString(), any(LocalDateTime.class), any(LocalDateTime.class)))
+            .willReturn(List.of(CRYPTO_JAN1, CRYPTO_JAN2));
+
         // when
-        List<CryptoData> result = cryptoService.getCryptoDataBySymbolForRange(symbolFromMonth(JANUARY), JANUARY, FEBRUARY);
+        List<CryptoData> result = cryptoService.getCryptoDataBySymbolForRange("A", JANUARY, FEBRUARY);
 
         // then
+        LocalDateTime beginningOfJanuary = JANUARY.atStartOfDay();
+        LocalDateTime beginningOfFebruary = FEBRUARY.atTime(LocalTime.MAX);
+
+        verify(cryptoRepository).findBySymbolBetweenDays("A", beginningOfJanuary, beginningOfFebruary);
         then(result).containsExactlyInAnyOrder(CryptoData.fromCrypto(CRYPTO_JAN1), CryptoData.fromCrypto(CRYPTO_JAN2));
     }
 
     @Test
     public void dataForRangeWithSwappedToAndFromDates() {
+        // given
+        given(cryptoRepository.findBySymbolBetweenDays(anyString(), any(LocalDateTime.class), any(LocalDateTime.class)))
+            .willReturn(List.of(CRYPTO_JAN1, CRYPTO_JAN2));
+
         // when dateFrom swapped with dateTo
-        List<CryptoData> result = cryptoService.getCryptoDataBySymbolForRange(symbolFromMonth(JANUARY), FEBRUARY, JANUARY);
+        List<CryptoData> result = cryptoService.getCryptoDataBySymbolForRange("A", FEBRUARY, JANUARY);
 
         // then
+        LocalDateTime beginningOfJanuary = JANUARY.atStartOfDay();
+        LocalDateTime beginningOfFebruary = FEBRUARY.atTime(LocalTime.MAX);
+
+        verify(cryptoRepository).findBySymbolBetweenDays("A", beginningOfJanuary, beginningOfFebruary);
         then(result).containsExactlyInAnyOrder(CryptoData.fromCrypto(CRYPTO_JAN1), CryptoData.fromCrypto(CRYPTO_JAN2));
     }
 
     @Test
-    public void highestNormalizedRangeForGivenDayReturned() {
+    public void emptyResultWhenNoDataForGivenSymbolInRange() {
+        // given
+        given(cryptoRepository.findBySymbolBetweenDays(anyString(), any(LocalDateTime.class), any(LocalDateTime.class))).willReturn(List.of());
+
+        // when
+        List<CryptoData> result = cryptoService.getCryptoDataBySymbolForRange("A", FEBRUARY, JANUARY);
+
+        // then
+        then(result).isEmpty();
+    }
+
+    @Test
+    public void highestNormalizedRangeForGivenDayProperlyConvertsDateToBeginningAndEndOfADay() {
+        // given
+        given(cryptoRepository.findBetweenDays(any(LocalDateTime.class), any(LocalDateTime.class))).willReturn(List.of(CRYPTO_JAN1, CRYPTO_JAN2));
+
         // when
         NormalizedRanges result = cryptoService.getHighestNormalizedRangeForDay(JANUARY);
 
         // then
-        System.out.println(result);
+        LocalDateTime beginningOfJanuary = JANUARY.atStartOfDay();
+        LocalDateTime endOfFirstOfJanuary = JANUARY.atTime(LocalTime.MAX);
+
+        verify(cryptoRepository).findBetweenDays(beginningOfJanuary, endOfFirstOfJanuary);
         then(result.getNormalizedRanges().keySet()).containsOnly(symbolFromMonth(JANUARY));
     }
 
     @Test
     public void exceptionThrownOnNonExistingDataForGivenDay() {
+        // given
+        given(cryptoRepository.findBySymbolBetweenDays(anyString(), any(LocalDateTime.class), any(LocalDateTime.class))).willReturn(List.of());
+
         // when
-        Throwable throwable = catchThrowable(() -> cryptoService.getHighestNormalizedRangeForDay(JANUARY.plusYears(1000)));
+        Throwable throwable = catchThrowable(() -> cryptoService.getHighestNormalizedRangeForDay(LocalDate.now()));
 
         // then
         then(throwable).isInstanceOf(CryptoDataNotAvailableException.class);
@@ -147,6 +191,9 @@ class CryptoServiceTest {
 
     @Test
     public void normalizedRangesForAllCurrenciesIsProperlyCalculated() {
+        // given
+        given(cryptoRepository.findAll()).willReturn(List.of(CRYPTO_JAN1, CRYPTO_JAN2, CRYPTO_FEB));
+
         // when
         NormalizedRanges normalizedRangesForAll = cryptoService.getNormalizedRangesForAll();
 
@@ -155,24 +202,20 @@ class CryptoServiceTest {
         then(normalizedRanges).isNotEmpty();
         then(normalizedRanges.get(symbolFromMonth(JANUARY))).isEqualByComparingTo(BigDecimal.valueOf(9));
         then(normalizedRanges.get(symbolFromMonth(FEBRUARY))).isEqualByComparingTo(BigDecimal.ZERO);
-        then(normalizedRanges.get(symbolFromMonth(MARCH))).isEqualByComparingTo(BigDecimal.ZERO);
         then(normalizedRangesForAll.getDateFrom()).isEqualTo(JANUARY.atTime(LocalTime.NOON));
-        then(normalizedRangesForAll.getDateTo()).isEqualTo(MARCH.atTime(LocalTime.NOON));
+        then(normalizedRangesForAll.getDateTo()).isEqualTo(FEBRUARY.atTime(LocalTime.NOON));
     }
 
     @Test
     public void exceptionThrownOnEmptyData() {
+        // given
+        given(cryptoRepository.findAll()).willReturn(List.of());
+
         // when
-        NormalizedRanges normalizedRangesForAll = cryptoService.getNormalizedRangesForAll();
+        Throwable throwable = catchThrowable(() -> cryptoService.getNormalizedRangesForAll());
 
         // then
-        LinkedHashMap<String, BigDecimal> normalizedRanges = normalizedRangesForAll.getNormalizedRanges();
-        then(normalizedRanges).isNotEmpty();
-        then(normalizedRanges.get(symbolFromMonth(JANUARY))).isEqualByComparingTo(BigDecimal.valueOf(9));
-        then(normalizedRanges.get(symbolFromMonth(FEBRUARY))).isEqualByComparingTo(BigDecimal.ZERO);
-        then(normalizedRanges.get(symbolFromMonth(MARCH))).isEqualByComparingTo(BigDecimal.ZERO);
-        then(normalizedRangesForAll.getDateFrom()).isEqualTo(JANUARY.atTime(LocalTime.NOON));
-        then(normalizedRangesForAll.getDateTo()).isEqualTo(MARCH.atTime(LocalTime.NOON));
+        then(throwable).isInstanceOf(CryptoDataNotAvailableException.class);
     }
 
     public static String symbolFromMonth(LocalDate aTime) {

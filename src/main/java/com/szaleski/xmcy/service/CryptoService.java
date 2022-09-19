@@ -61,8 +61,8 @@ public class CryptoService {
     }
 
     public List<CryptoData> getCryptoDataBySymbolForMonth(String symbol, LocalDate date) {
-        LocalDate plusMonth = date.plusMonths(1);
-        List<Crypto> bySymbolBetweenDays = cryptoRepository.findBySymbolBetweenDays(symbol, date.atStartOfDay(), plusMonth.atTime(LocalTime.MAX));
+        LocalDate lastDayOfGivenMonth = date.plusMonths(1).minusDays(1);
+        List<Crypto> bySymbolBetweenDays = cryptoRepository.findBySymbolBetweenDays(symbol, date.atStartOfDay(), lastDayOfGivenMonth.atTime(LocalTime.MAX));
 
         return bySymbolBetweenDays.stream().map(CryptoData::fromCrypto).collect(Collectors.toList());
     }
