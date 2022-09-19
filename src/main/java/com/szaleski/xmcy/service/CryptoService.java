@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException;
@@ -27,6 +28,7 @@ public class CryptoService {
     private final CryptoRepository cryptoRepository;
     private final CryptoDataRangeNormalizer cryptoDataRangeNormalizer;
 
+    @Cacheable("bySymbols")
     public List<CryptoData> getCryptoBySymbol(String symbol) {
         List<Crypto> cryptoBySymbol = cryptoRepository.findBySymbol(symbol);
 
@@ -77,6 +79,7 @@ public class CryptoService {
         return bySymbolBetweenDays.stream().map(CryptoData::fromCrypto).collect(Collectors.toList());
     }
 
+    @Cacheable("symbols")
     public List<String> getAvailableCryptos() {
         return cryptoRepository.findDistinctSymbols().stream().sorted().collect(Collectors.toList());
     }

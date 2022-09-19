@@ -22,6 +22,14 @@ spring:
 server:
   port: 8080
 ---
+spring:
+  config:
+    activate:
+      on-profile: test
+  cache:
+    type: none
+
+---
 logging:
   level:
     org.springframework.jdbc.datasource.init.ScriptUtils: debug

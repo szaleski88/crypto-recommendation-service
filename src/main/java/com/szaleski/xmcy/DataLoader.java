@@ -43,6 +43,11 @@ public class DataLoader implements ApplicationRunner {
     public void run(ApplicationArguments args) throws IOException {
         final File path = resourceLoader.getResource(pathToResources).getFile();
 
+        if(path.listFiles() == null) {
+            LOG.info("No resources to load");
+            return;
+        }
+
         for (final File file : Objects.requireNonNull(path.listFiles())) {
             LOG.info("Loading currency data from: {}", file.getName());
             final List<Crypto> cryptos = csvCryptoLoader.readCryptoFromCsv(file.toPath());

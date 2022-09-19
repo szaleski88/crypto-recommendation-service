@@ -18,9 +18,18 @@ public interface CryptoRepository extends JpaRepository<Crypto, Long> {
     @Query(value = "SELECT DISTINCT symbol FROM CRYPTO", nativeQuery = true)
     List<String> findDistinctSymbols();
 
+    /**
+     * @param symbol  currency symbol
+     * @param fromDay FROM day (inclusive)
+     * @param toDay   TO day (exclusive)
+     */
     @Query(value = "SELECT * FROM CRYPTO c WHERE c.symbol = :symbol AND c.tstamp >= :fromDay and c.tstamp < :toDay", nativeQuery = true)
     List<Crypto> findBySymbolBetweenDays(@Param("symbol") String symbol, @Param("fromDay") LocalDateTime fromDay, @Param("toDay") LocalDateTime toDay);
 
+    /**
+     * @param fromDay FROM day (inclusive)
+     * @param toDay   TO day (exclusive)
+     */
     @Query(value = "SELECT * FROM CRYPTO c WHERE c.tstamp >= :fromDay and c.tstamp < :toDay", nativeQuery = true)
     List<Crypto> findBetweenDays(@Param("fromDay") LocalDateTime fromDay, @Param("toDay") LocalDateTime toDay);
 
