@@ -7,7 +7,7 @@ spring:
 
 crypto:
   initial:
-    data: classpath:initial_data
+    data: /initial_data
 server:
   port: 8080
 ---

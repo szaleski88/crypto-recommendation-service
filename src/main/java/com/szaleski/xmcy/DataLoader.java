@@ -2,6 +2,7 @@ package com.szaleski.xmcy;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,6 +19,9 @@ import com.szaleski.xmcy.loader.CsvCryptoLoader;
 import com.szaleski.xmcy.model.Crypto;
 import com.szaleski.xmcy.repository.CryptoRepository;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Component
 @Profile("dev")
 public class DataLoader implements ApplicationRunner {
@@ -31,18 +35,12 @@ public class DataLoader implements ApplicationRunner {
     private final CsvCryptoLoader csvCryptoLoader;
     private final CryptoRepository cryptoRepository;
 
-    public DataLoader(ResourceLoader resourceLoader,
-                      CsvCryptoLoader csvCryptoLoader,
-                      CryptoRepository cryptoRepository) {
-        this.resourceLoader = resourceLoader;
-        this.csvCryptoLoader = csvCryptoLoader;
-        this.cryptoRepository = cryptoRepository;
-    }
-
     public void run(ApplicationArguments args) throws IOException {
-        final File path = resourceLoader.getResource(pathToResources).getFile();
+        final File path = pathToResources.toLowerCase().startsWith("classpath") ?
+                          resourceLoader.getResource(pathToResources).getFile() :
+                          Paths.get(pathToResources).toFile();
 
-        if(path.listFiles() == null) {
+        if (path.listFiles() == null) {
             LOG.info("No resources to load");
             return;
         }
