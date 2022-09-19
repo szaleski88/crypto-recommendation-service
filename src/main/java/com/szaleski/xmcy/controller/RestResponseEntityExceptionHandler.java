@@ -27,7 +27,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
                                                                           HttpHeaders headers,
                                                                           HttpStatus status, WebRequest request) {
-        return handleExceptionInternal(ex, "Missing 'month' parameter. Try adding it in format: '?month=yyyy-MM'", headers, status, request);
+        return handleExceptionInternal(ex, ex.getMessage(), headers, status, request);
     }
 
 }

@@ -1,15 +1,8 @@
 package com.szaleski.xmcy.repository;
 
-import static com.szaleski.xmcy.TestData.CRYPTO_FEB;
-import static com.szaleski.xmcy.TestData.CRYPTO_JAN1;
-import static com.szaleski.xmcy.TestData.CRYPTO_JAN2;
-import static com.szaleski.xmcy.TestData.CRYPTO_MAR;
-import static com.szaleski.xmcy.TestData.FEBRUARY;
-import static com.szaleski.xmcy.TestData.JANUARY;
-import static com.szaleski.xmcy.TestData.MARCH;
-import static com.szaleski.xmcy.TestData.symbolFromMonth;
 import static org.assertj.core.api.BDDAssertions.then;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
@@ -22,18 +15,25 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import com.szaleski.xmcy.TestData;
 import com.szaleski.xmcy.model.Crypto;
 
 @DataJpaTest
 class CryptoRepositoryTest {
+
+    public static final LocalDateTime JANUARY = LocalDateTime.of(2022, 1, 1, 12, 0, 0);
+    public static final LocalDateTime FEBRUARY = LocalDateTime.of(2022, 2, 1, 12, 0, 0);
+    public static final LocalDateTime MARCH = LocalDateTime.of(2022, 3, 1, 12, 0, 0);
+    public static final Crypto CRYPTO_JAN1 = new Crypto(null, JANUARY, symbolFromMonth(JANUARY), BigDecimal.ONE);
+    public static final Crypto CRYPTO_JAN2 = new Crypto(null, JANUARY.plusDays(1), symbolFromMonth(JANUARY), BigDecimal.TEN);
+    public static final Crypto CRYPTO_FEB = new Crypto(null, FEBRUARY, symbolFromMonth(FEBRUARY), BigDecimal.TEN);
+    public static final Crypto CRYPTO_MAR = new Crypto(null, MARCH, symbolFromMonth(MARCH), BigDecimal.ZERO);
 
     @Autowired
     private CryptoRepository cryptoRepository;
 
     @BeforeEach
     public void setUp() {
-        cryptoRepository.saveAll(TestData.getAll());
+        cryptoRepository.saveAll(List.of(CRYPTO_JAN1, CRYPTO_JAN2, CRYPTO_FEB, CRYPTO_MAR));
     }
 
     public static Stream<Arguments> findBySymbolBetweenDaysTestData() {
@@ -96,4 +96,7 @@ class CryptoRepositoryTest {
         then(result).containsExactlyInAnyOrder(symbolFromMonth(JANUARY), symbolFromMonth(FEBRUARY), symbolFromMonth(MARCH));
     }
 
+    public static String symbolFromMonth(LocalDateTime aTime) {
+        return aTime.getMonth().toString();
+    }
 }

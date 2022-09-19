@@ -2,12 +2,15 @@ package com.szaleski.xmcy.controller;
 
 import static com.szaleski.xmcy.utils.DateUtils.toLocalDateTime;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,29 +42,28 @@ public class CryptoRestController {
     public CryptoReport getCryptoReportForMonth(@Parameter(example = "BTC") @PathVariable String currencySymbol,
                                                 @Parameter(example = "2022-01")
                                                 @RequestParam(name = "month")
-                                                @DateTimeFormat(pattern = "yyyy-MM") @Valid Date month) {
+                                                @DateTimeFormat(pattern = "yyyy-MM") @Valid LocalDate month) {
         List<CryptoData> reportData;
 
         if (Objects.isNull(month)) {
             reportData = cryptoService.getCryptoBySymbol(currencySymbol);
         } else {
-            reportData = cryptoService.getCryptoDataBySymbolForMonth(currencySymbol, toLocalDateTime(month));
+            reportData = cryptoService.getCryptoDataBySymbolForMonth(currencySymbol, month);
         }
 
-        return reportGenerator.generateReportFor(currencySymbol, reportData, toLocalDateTime(month));
+        return reportGenerator.generateReportFor(currencySymbol, reportData, month);
     }
 
     @Operation(summary = "Get report of given crypto for custom date range")
     @GetMapping(value = "/{currencySymbol}/customReport")
     public CryptoReport getCryptoReport(@Parameter(example = "BTC") @PathVariable String currencySymbol,
-                                        @Parameter(example = "2022-01-01") @RequestParam(name = "dateFrom") @DateTimeFormat(pattern = "yyyy-MM-dddd") @Valid Date dateFrom,
-                                        @Parameter(example = "2022-01-02") @RequestParam(name = "dateTo") @DateTimeFormat(pattern = "yyyy-MM-dddd") @Valid Date dateTo) {
-        LocalDateTime asLocalDateTime = toLocalDateTime(dateFrom);
+                                        @Parameter(example = "2022-01-01") @RequestParam(name = "dateFrom") @DateTimeFormat(pattern = "yyyy-MM-dddd") @Valid LocalDate dateFrom,
+                                        @Parameter(example = "2022-01-02") @RequestParam(name = "dateTo") @DateTimeFormat(pattern = "yyyy-MM-dddd") @Valid LocalDate dateTo) {
 
         List<CryptoData>
-            reportData = cryptoService.getCryptoDataBySymbolForRange(currencySymbol, asLocalDateTime, toLocalDateTime(dateTo));
+            reportData = cryptoService.getCryptoDataBySymbolForRange(currencySymbol, dateFrom, dateTo);
 
-        return reportGenerator.generateReportFor(currencySymbol, reportData, asLocalDateTime);
+        return reportGenerator.generateReportFor(currencySymbol, reportData, dateFrom);
     }
 
     @Operation(summary = "Get normalized ranges of all available currencies")
@@ -74,8 +76,8 @@ public class CryptoRestController {
     @GetMapping(value = "/highestNormalizedRange/{date}")
     public NormalizedRanges getHighestNormalizedRangeForDay(@Parameter(example = "2022-01-01")
                                                                   @PathVariable(name = "date")
-                                                                  @DateTimeFormat(pattern = "yyyy-MM-dd") @Valid Date date) {
-        return cryptoService.getHighestNormalizedRangeForDay(toLocalDateTime(date));
+                                                                  @DateTimeFormat(pattern = "yyyy-MM-dd") @Valid LocalDate date) {
+        return cryptoService.getHighestNormalizedRangeForDay(date);
     }
 
 }

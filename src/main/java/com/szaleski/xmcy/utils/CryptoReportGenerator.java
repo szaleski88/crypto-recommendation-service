@@ -3,6 +3,7 @@ package com.szaleski.xmcy.utils;
 import static com.szaleski.xmcy.model.PriceData.from;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class CryptoReportGenerator {
     private final CryptoFilter cryptoFilter;
     private final CryptoDataRangeNormalizer cryptoDataRangeNormalizer;
 
-    public CryptoReport generateReportFor(String symbol, List<CryptoData> dataForReport, LocalDateTime date) {
+    public CryptoReport generateReportFor(String symbol, List<CryptoData> dataForReport, LocalDate date) {
         if (dataForReport.isEmpty()) {
             throw CryptoDataNotAvailableException.forSymbolAndDate(symbol, date);
         }

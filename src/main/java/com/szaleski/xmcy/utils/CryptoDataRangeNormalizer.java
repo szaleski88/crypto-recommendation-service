@@ -2,7 +2,9 @@ package com.szaleski.xmcy.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,7 +36,6 @@ public class CryptoDataRangeNormalizer {
         if (minPrice == null) {
             return BigDecimal.ZERO;
         }
-
         final BigDecimal maxPrice = cryptoData.parallelStream()
                                               .filter(cd -> !cd.getPrice().equals(BigDecimal.ZERO))
                                               .max(Comparator.comparing(CryptoData::getPrice))
@@ -59,8 +60,11 @@ public class CryptoDataRangeNormalizer {
         return new NormalizedRanges(dateFrom, dateTo, normalizedRangesByCryptoSymbol);
     }
 
-    public NormalizedRanges getHighestNormalizedRangeOfDay(List<CryptoData> cryptoData, LocalDateTime date) {
-        NormalizedRanges normalizedRanges = getNormalizedRanges(cryptoData, date, date);
+    public NormalizedRanges getHighestNormalizedRangeOfDay(List<CryptoData> cryptoData, LocalDate date) {
+        LocalDateTime dateTo = date.atTime(LocalTime.MAX);
+        LocalDateTime dateFrom = date.atStartOfDay();
+
+        NormalizedRanges normalizedRanges = getNormalizedRanges(cryptoData, dateFrom, dateTo);
         BigDecimal highestNormalizedRange = normalizedRanges.getNormalizedRanges().entrySet().iterator().next().getValue();
 
         LinkedHashMap<String, BigDecimal> currenciesWithHighestNormalizedRanges =
@@ -70,6 +74,6 @@ public class CryptoDataRangeNormalizer {
                                                  (v1, v2) -> v2,
                                                  LinkedHashMap::new));
 
-        return new NormalizedRanges(date, date, currenciesWithHighestNormalizedRanges);
+        return new NormalizedRanges(dateFrom, dateTo, currenciesWithHighestNormalizedRanges);
     }
 }

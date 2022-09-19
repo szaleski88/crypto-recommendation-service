@@ -3,6 +3,7 @@ package com.szaleski.xmcy.utils
 import com.szaleski.xmcy.model.CryptoData
 import spock.lang.Specification
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class CryptoDataRangeNormalizerTest extends Specification {
@@ -55,7 +56,7 @@ class CryptoDataRangeNormalizerTest extends Specification {
 
         def cryptoData = [cryptoA1, cryptoA2, cryptoB]
         when:
-        def result = normalizer.getHighestNormalizedRangeOfDay(cryptoData, LocalDateTime.now())
+        def result = normalizer.getHighestNormalizedRangeOfDay(cryptoData, LocalDate.now())
 
         then:
 

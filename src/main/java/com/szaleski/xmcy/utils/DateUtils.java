@@ -1,6 +1,7 @@
 package com.szaleski.xmcy.utils;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -25,7 +26,7 @@ public class DateUtils {
                    .toLocalDateTime();
     }
 
-    public static String toDateString(LocalDateTime date) {
+    public static String toDateString(LocalDate date) {
         final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return dateTimeFormatter.format(date);
     }
