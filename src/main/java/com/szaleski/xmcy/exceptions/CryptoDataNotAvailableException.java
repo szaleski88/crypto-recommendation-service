@@ -1,6 +1,6 @@
 package com.szaleski.xmcy.exceptions;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import com.szaleski.xmcy.utils.DateUtils;
 
@@ -12,7 +12,7 @@ public class CryptoDataNotAvailableException extends RuntimeException {
     private static final String MSG_TEMPLATE = "No data for Crypto symbol: '%s' for date: '%s'.";
     private static final String MSG_TEMPLATE_DATE = "No data for date: '%s'.";
     private final String symbol;
-    private final Date date;
+    private final LocalDateTime date;
 
     public CryptoDataNotAvailableException(String message) {
         super(message);
@@ -20,19 +20,19 @@ public class CryptoDataNotAvailableException extends RuntimeException {
         this.date = null;
     }
 
-    public CryptoDataNotAvailableException(String message, String symbol, Date date) {
+    public CryptoDataNotAvailableException(String message, String symbol, LocalDateTime date) {
         super(message);
         this.symbol = symbol;
         this.date = date;
     }
 
-    public static CryptoDataNotAvailableException forSymbolAndDate(String symbol, Date date) {
+    public static CryptoDataNotAvailableException forSymbolAndDate(String symbol, LocalDateTime date) {
         String dateString = date == null ? "None" : DateUtils.toDateString(date);
         String message = String.format(MSG_TEMPLATE, symbol, dateString);
         return new CryptoDataNotAvailableException(message, symbol, date);
     }
 
-    public static CryptoDataNotAvailableException forDate(Date date) {
+    public static CryptoDataNotAvailableException forDate(LocalDateTime date) {
         String dateString = DateUtils.toDateString(date);
         String message = String.format(MSG_TEMPLATE_DATE, dateString);
         return new CryptoDataNotAvailableException(message, "None", date);

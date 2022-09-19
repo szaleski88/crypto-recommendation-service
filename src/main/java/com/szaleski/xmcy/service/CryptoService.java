@@ -2,22 +2,19 @@ package com.szaleski.xmcy.service;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException;
 import com.szaleski.xmcy.exceptions.UnknownCryptoSymbolException;
 import com.szaleski.xmcy.model.Crypto;
 import com.szaleski.xmcy.model.CryptoData;
-import com.szaleski.xmcy.model.HighestNormalizedRange;
 import com.szaleski.xmcy.model.NormalizedRanges;
 import com.szaleski.xmcy.repository.CryptoRepository;
 import com.szaleski.xmcy.utils.CryptoDataRangeNormalizer;
-import com.szaleski.xmcy.utils.DateUtils;
 
 import lombok.AllArgsConstructor;
 
@@ -28,7 +25,6 @@ public class CryptoService {
     private final CryptoRepository cryptoRepository;
     private final CryptoDataRangeNormalizer cryptoDataRangeNormalizer;
 
-    @Cacheable("bySymbols")
     public List<CryptoData> getCryptoBySymbol(String symbol) {
         List<Crypto> cryptoBySymbol = cryptoRepository.findBySymbol(symbol);
 
@@ -41,9 +37,9 @@ public class CryptoService {
                              .collect(Collectors.toList());
     }
 
-    public HighestNormalizedRange getHighestNormalizedRangeForDay(Date date) {
+    public NormalizedRanges getHighestNormalizedRangeForDay(LocalDateTime date) {
         List<CryptoData> cryptoData = getCryptoDataForDay(date);
-        return cryptoDataRangeNormalizer.getHighestNormalizedRange(cryptoData, date);
+        return cryptoDataRangeNormalizer.getHighestNormalizedRangeOfDay(cryptoData, date);
     }
 
     public NormalizedRanges getNormalizedRangesForAll() {
@@ -56,38 +52,35 @@ public class CryptoService {
         List<CryptoData> cryptoData = allCryptoData.stream()
                                                    .map(CryptoData::fromCrypto)
                                                    .collect(Collectors.toList());
-        return cryptoDataRangeNormalizer.getNormalizedRanges(cryptoData);
+        LocalDateTime minDate = cryptoData.stream().map(CryptoData::getTimestamp).min(Comparator.comparing(Function.identity())).get();
+        LocalDateTime maxDate = cryptoData.stream().map(CryptoData::getTimestamp).max(Comparator.comparing(Function.identity())).get();
+
+        return cryptoDataRangeNormalizer.getNormalizedRanges(cryptoData, minDate, maxDate);
     }
 
-    public List<CryptoData> getCryptoDataBySymbolForMonth(String symbol, Date date) {
-        LocalDateTime localDateTime = DateUtils.toLocalDateTime(date);
-        LocalDateTime plusMonth = localDateTime.plusMonths(1);
-        List<Crypto> bySymbolBetweenDays = cryptoRepository.findBySymbolBetweenDays(symbol, localDateTime, plusMonth);
+    public List<CryptoData> getCryptoDataBySymbolForMonth(String symbol, LocalDateTime date) {
+        LocalDateTime plusMonth = date.plusMonths(1);
+        List<Crypto> bySymbolBetweenDays = cryptoRepository.findBySymbolBetweenDays(symbol, date, plusMonth);
 
         return bySymbolBetweenDays.stream().map(CryptoData::fromCrypto).collect(Collectors.toList());
     }
 
-    public List<CryptoData> getCryptoDataBySymbolForRange(String symbol, Date dateFrom, Date dateTo) {
-        LocalDateTime from = DateUtils.toLocalDateTime(dateFrom);
-        LocalDateTime to = DateUtils.toLocalDateTime(dateTo).plusDays(1);
-
-        LocalDateTime realFrom = from.isBefore(to) ? from : to;
-        LocalDateTime realTo = to.isAfter(from) ? to : from;
+    public List<CryptoData> getCryptoDataBySymbolForRange(String symbol, LocalDateTime dateFrom, LocalDateTime dateTo) {
+        LocalDateTime realFrom = dateFrom.isBefore(dateTo) ? dateFrom : dateTo;
+        LocalDateTime realTo = dateFrom.isBefore(dateTo) ? dateTo : dateFrom;
 
         List<Crypto> bySymbolBetweenDays = cryptoRepository.findBySymbolBetweenDays(symbol, realFrom, realTo);
 
         return bySymbolBetweenDays.stream().map(CryptoData::fromCrypto).collect(Collectors.toList());
     }
 
-    @Cacheable("symbols")
     public List<String> getAvailableCryptos() {
         return cryptoRepository.findDistinctSymbols().stream().sorted().collect(Collectors.toList());
     }
 
-    private List<CryptoData> getCryptoDataForDay(Date date) {
-        LocalDateTime fromDay = DateUtils.toLocalDateTime(date);
-        LocalDateTime toDay = fromDay.plusDays(1);
-        List<Crypto> cryptoValuesForDate = cryptoRepository.findBetweenDays(fromDay, toDay);
+    private List<CryptoData> getCryptoDataForDay(LocalDateTime date) {
+        LocalDateTime toDay = date.plusDays(1);
+        List<Crypto> cryptoValuesForDate = cryptoRepository.findBetweenDays(date, toDay);
 
         if (cryptoValuesForDate.isEmpty()) {
             throw CryptoDataNotAvailableException.forDate(date);

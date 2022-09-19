@@ -1,9 +1,9 @@
 package com.szaleski.xmcy.utils;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class DateUtils {
@@ -25,9 +25,9 @@ public class DateUtils {
                    .toLocalDateTime();
     }
 
-    public static String toDateString(Date date) {
-        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return simpleDateFormat.format(date);
+    public static String toDateString(LocalDateTime date) {
+        final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return dateTimeFormatter.format(date);
     }
 
 }

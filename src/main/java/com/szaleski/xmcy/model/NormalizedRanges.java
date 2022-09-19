@@ -1,15 +1,18 @@
 package com.szaleski.xmcy.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 
 @AllArgsConstructor
-@Getter
+@Data
 public class NormalizedRanges {
 
-    final LinkedHashMap<String, BigDecimal> normalizedRanges;
+    private final LocalDateTime dateFrom;
+    private final LocalDateTime dateTo;
+    private final LinkedHashMap<String, BigDecimal> normalizedRanges;
 
 }

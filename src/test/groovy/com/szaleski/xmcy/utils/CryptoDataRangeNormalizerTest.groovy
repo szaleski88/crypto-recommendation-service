@@ -3,6 +3,8 @@ package com.szaleski.xmcy.utils
 import com.szaleski.xmcy.model.CryptoData
 import spock.lang.Specification
 
+import java.time.LocalDateTime
+
 class CryptoDataRangeNormalizerTest extends Specification {
 
     private static CryptoDataRangeNormalizer normalizer = new CryptoDataRangeNormalizer()
@@ -35,7 +37,7 @@ class CryptoDataRangeNormalizerTest extends Specification {
 
         def cryptoData = [cryptoA1, cryptoA2, cryptoB1, cryptoB2, cryptoC]
         when:
-        def result = normalizer.getNormalizedRanges(cryptoData)
+        def result = normalizer.getNormalizedRanges(cryptoData, null, null)
 
         then:
         def ranges = result.getNormalizedRanges()
@@ -45,7 +47,7 @@ class CryptoDataRangeNormalizerTest extends Specification {
         ranges.get("C") == 0
     }
 
-    def "Get Highest normalized Range" () {
+    def "Get Highest normalized Range"() {
         given:
         def cryptoA1 = getMockWithSymbolAndPrice("A", 1)
         def cryptoA2 = getMockWithSymbolAndPrice("A", 2)
@@ -53,19 +55,21 @@ class CryptoDataRangeNormalizerTest extends Specification {
 
         def cryptoData = [cryptoA1, cryptoA2, cryptoB]
         when:
-        def result = normalizer.getHighestNormalizedRange(cryptoData, new Date())
+        def result = normalizer.getHighestNormalizedRangeOfDay(cryptoData, LocalDateTime.now())
 
         then:
-        result.getCurrency() == "A"
-        result.getNormalizedRange() == 1
+
+        with(result.getNormalizedRanges()) {
+            it.get("A") == 1
+        }
     }
 
     def "No crypto"() {
         when:
-        normalizer.getSingleNormalizedRange([])
+        def result = normalizer.getSingleNormalizedRange([])
 
         then:
-        thrown NoSuchElementException
+        result == 0
     }
 
 
