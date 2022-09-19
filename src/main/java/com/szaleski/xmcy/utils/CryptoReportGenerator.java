@@ -4,7 +4,6 @@ import static com.szaleski.xmcy.model.PriceData.from;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Component;

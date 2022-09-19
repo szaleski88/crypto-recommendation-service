@@ -4,7 +4,6 @@ import static com.szaleski.xmcy.utils.DateUtils.toLocalDate;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 import javax.validation.Valid;
 
@@ -39,13 +38,7 @@ public class CryptoRestController {
                                                 @Parameter(example = "2022-01")
                                                 @RequestParam(name = "month")
                                                 @DateTimeFormat(pattern = "yyyy-MM") @Valid Date month) {
-        List<CryptoData> reportData;
-
-        if (Objects.isNull(month)) {
-            reportData = cryptoService.getCryptoBySymbol(currencySymbol);
-        } else {
-            reportData = cryptoService.getCryptoDataBySymbolForMonth(currencySymbol, toLocalDate(month));
-        }
+        List<CryptoData> reportData = cryptoService.getCryptoDataBySymbolForMonth(currencySymbol, toLocalDate(month));
 
         return reportGenerator.generateReportFor(currencySymbol, reportData, toLocalDate(month));
     }
@@ -56,8 +49,7 @@ public class CryptoRestController {
                                         @Parameter(example = "2022-01-01") @RequestParam(name = "dateFrom") @DateTimeFormat(pattern = "yyyy-MM-dddd") @Valid Date dateFrom,
                                         @Parameter(example = "2022-01-02") @RequestParam(name = "dateTo") @DateTimeFormat(pattern = "yyyy-MM-dddd") @Valid Date dateTo) {
 
-        List<CryptoData>
-            reportData = cryptoService.getCryptoDataBySymbolForRange(currencySymbol, toLocalDate(dateFrom), toLocalDate(dateTo));
+        List<CryptoData> reportData = cryptoService.getCryptoDataBySymbolForRange(currencySymbol, toLocalDate(dateFrom), toLocalDate(dateTo));
 
         return reportGenerator.generateReportFor(currencySymbol, reportData, toLocalDate(dateFrom));
     }
@@ -69,9 +61,9 @@ public class CryptoRestController {
     }
 
     @Operation(summary = "Get NORMALIZED value of given crypto for given day")
-    @GetMapping(value = "/highestNormalizedRange/{date}")
+    @GetMapping(value = "/highestNormalizedRange")
     public NormalizedRanges getHighestNormalizedRangeForDay(@Parameter(example = "2022-01-01")
-                                                            @PathVariable(name = "date")
+                                                            @RequestParam(name = "date")
                                                             @DateTimeFormat(pattern = "yyyy-MM-dd") @Valid Date date) {
         return cryptoService.getHighestNormalizedRangeForDay(toLocalDate(date));
     }
