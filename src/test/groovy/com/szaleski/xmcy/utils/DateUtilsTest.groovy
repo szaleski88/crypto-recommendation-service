@@ -21,7 +21,7 @@ class DateUtilsTest extends Specification {
         def date = Date.from(Instant.ofEpochMilli(MILIS))
 
         expect:
-        JANUARY_1ST == DateUtils.toLocalDateTime(date)
+        LocalDate.of(2022, 01, 01) == DateUtils.toLocalDate(date)
     }
 
     def "ToDateString"() {

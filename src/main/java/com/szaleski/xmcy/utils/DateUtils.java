@@ -20,10 +20,10 @@ public class DateUtils {
                       .toLocalDateTime();
     }
 
-    public static LocalDateTime toLocalDateTime(Date date) {
+    public static LocalDate toLocalDate(Date date) {
         return date.toInstant()
                    .atZone(ZoneId.systemDefault())
-                   .toLocalDateTime();
+                   .toLocalDate();
     }
 
     public static String toDateString(LocalDate date) {
