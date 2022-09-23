@@ -14,8 +14,10 @@ spring:
     check-location: false
     locations: classpath:db/migration
 crypto:
-  initial:
-    data: /initial_data
+  initial-data:
+    path: /initial_data
+    load: true
+
   log-method-calls: true
 server:
   port: 8080
@@ -39,8 +41,9 @@ spring:
     check-location: false
     locations: filesystem:/migration
 crypto:
-  initial:
-    data: /initial_data
+  initial-data:
+    path: /initial_data
+    load: false
   log-method-calls: false
 server:
   port: 9000
