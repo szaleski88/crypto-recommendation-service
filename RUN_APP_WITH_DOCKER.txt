@@ -1,0 +1,1 @@
+docker run --rm --name crypto-recommendation-service --link pg-docker:pg-docker -e "CRYPTO_INITIAL-DATA_LOAD=true" -e "CRYPTO_LOG-METHOD-CALLS=true" -e "SPRING_DATASOURCE_URL=jdbc:postgresql://pg-docker:5432/crypto" -e "SPRING_PROFILES_ACTIVE=prod" -p 8080:8080 -t szaleski88/crypto-recommendation-service:latest
