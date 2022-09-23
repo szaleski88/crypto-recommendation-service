@@ -4,7 +4,15 @@ spring:
       on-profile: dev
   datasource:
     url: jdbc:h2:mem:cryptoDB
-
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+  flyway:
+    check-location: false
+    locations: classpath:db/migration
 crypto:
   initial:
     data: /initial_data
@@ -16,11 +24,22 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: jdbc:h2:mem:cryptoDB
-    password: admin
-    username: admin
+    #    url: jdbc:postgresql://<container_name>:5432/crypto
+    url: jdbc:postgresql://localhost:5432/crypto
+    password: postgres
+    username: postgres
+    initialize: true
+    initialization-mode: always
+    continue-on-error: true
+    jpa:
+      hibernate:
+        ddl-auto: none
+  flyway:
+    check-location: false
+    locations: filesystem:/migration
 server:
-  port: 8080
+  port: 9000
+
 ---
 spring:
   config:
@@ -38,12 +57,7 @@ server:
   port: 8080
 
 spring:
-  h2:
-    console:
-      enabled: true
-  jpa:
-    hibernate:
-      ddl-auto: none
+
   mvc:
     format:
       date: yyyy-MM-dd
