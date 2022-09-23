@@ -16,6 +16,7 @@ spring:
 crypto:
   initial:
     data: /initial_data
+  log-method-calls: true
 server:
   port: 8080
 ---
@@ -40,6 +41,7 @@ spring:
 crypto:
   initial:
     data: /initial_data
+  log-method-calls: false
 server:
   port: 9000
 
@@ -60,7 +62,6 @@ server:
   port: 8080
 
 spring:
-
   mvc:
     format:
       date: yyyy-MM-dd
@@ -83,10 +84,10 @@ bucket4j:
               time: 1
               unit: minutes
 
-
 springdoc:
     api-docs:
       path: /api/v1/crypto/api-docs
+
 
 
 
