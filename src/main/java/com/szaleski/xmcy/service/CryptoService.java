@@ -1,5 +1,7 @@
 package com.szaleski.xmcy.service;
 
+import static com.szaleski.xmcy.configuration.CacheConstants.DATABASE_CACHE;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException;
@@ -38,12 +41,13 @@ public class CryptoService {
                              .sorted(Comparator.comparing(CryptoData::getTimestamp))
                              .collect(Collectors.toList());
     }
-
+    @Cacheable(value = DATABASE_CACHE)
     public NormalizedRanges getHighestNormalizedRangeForDay(LocalDate date) {
         List<CryptoData> cryptoData = getCryptoDataForDay(date);
         return cryptoDataRangeNormalizer.getHighestNormalizedRangeOfDay(cryptoData, date);
     }
 
+    @Cacheable(value = DATABASE_CACHE)
     public NormalizedRanges getNormalizedRangesForAll() {
         List<Crypto> allCryptoData = cryptoRepository.findAll();
 
@@ -60,6 +64,7 @@ public class CryptoService {
         return cryptoDataRangeNormalizer.getNormalizedRanges(cryptoData, minDate, maxDate);
     }
 
+    @Cacheable(value = DATABASE_CACHE)
     public List<CryptoData> getCryptoDataBySymbolForMonth(String symbol, LocalDate date) {
         LocalDate lastDayOfGivenMonth = date.plusMonths(1).minusDays(1);
         List<Crypto> bySymbolBetweenDays = cryptoRepository.findBySymbolBetweenDays(symbol, date.atStartOfDay(), lastDayOfGivenMonth.atTime(LocalTime.MAX));
@@ -67,6 +72,7 @@ public class CryptoService {
         return bySymbolBetweenDays.stream().map(CryptoData::fromCrypto).collect(Collectors.toList());
     }
 
+    @Cacheable(value = DATABASE_CACHE)
     public List<CryptoData> getCryptoDataBySymbolForRange(String symbol, LocalDate dateFrom, LocalDate dateTo) {
         LocalDate realFrom = dateFrom.isBefore(dateTo) ? dateFrom : dateTo;
         LocalDate realTo = dateFrom.isBefore(dateTo) ? dateTo : dateFrom;
