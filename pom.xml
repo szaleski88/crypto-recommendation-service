@@ -12,7 +12,7 @@
 	<artifactId>crypto-recommendation</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>crypto-recommendation</name>
-	<description>Demo project for XMCY</description>
+	<description>Demo Spring Boot project</description>
 	<properties>
 		<java.version>11</java.version>
 	</properties>

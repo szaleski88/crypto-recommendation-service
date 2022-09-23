@@ -37,6 +37,9 @@ spring:
   flyway:
     check-location: false
     locations: filesystem:/migration
+crypto:
+  initial:
+    data: /initial_data
 server:
   port: 9000
 
