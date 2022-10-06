@@ -3,12 +3,10 @@ package com.szaleski.xmcy.utils;
 import static com.szaleski.xmcy.model.PriceData.from;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException;
 import com.szaleski.xmcy.model.CryptoData;
 import com.szaleski.xmcy.model.CryptoReport;
 
