@@ -4,6 +4,7 @@ import static com.szaleski.xmcy.model.CryptoData.fromCrypto;
 import static java.math.RoundingMode.FLOOR;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.assertj.core.api.BDDAssertions.thenThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -108,14 +109,12 @@ class CryptoServiceTest {
         given(cryptoRepository.findBySymbolBetweenDays(anyString(), any(LocalDateTime.class), any(LocalDateTime.class))).willReturn(List.of());
 
         // when
-        List<CryptoData> result = cryptoService.getCryptoDataBySymbolForMonth("NON_EXISTING", JANUARY);
-
         // then
         LocalDateTime beginningOfJanuary = JANUARY.atStartOfDay();
         LocalDateTime endOfJanuary = FEBRUARY.minusDays(1).atTime(LocalTime.MAX);
 
+        thenThrownBy(() -> cryptoService.getCryptoDataBySymbolForMonth("NON_EXISTING", JANUARY)).isInstanceOf(CryptoDataNotAvailableException.class);
         verify(cryptoRepository).findBySymbolBetweenDays("NON_EXISTING", beginningOfJanuary, endOfJanuary);
-        then(result).isEmpty();
     }
 
     @Test
@@ -158,10 +157,8 @@ class CryptoServiceTest {
         given(cryptoRepository.findBySymbolBetweenDays(anyString(), any(LocalDateTime.class), any(LocalDateTime.class))).willReturn(List.of());
 
         // when
-        List<CryptoData> result = cryptoService.getCryptoDataBySymbolForRange("A", FEBRUARY, JANUARY);
-
-        // then
-        then(result).isEmpty();
+        //then
+        thenThrownBy(() ->  cryptoService.getCryptoDataBySymbolForRange("A", FEBRUARY, JANUARY)).isInstanceOf(CryptoDataNotAvailableException.class);
     }
 
     @Test

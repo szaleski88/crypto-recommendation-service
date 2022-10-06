@@ -68,7 +68,13 @@ public class CryptoService {
     public List<CryptoData> getCryptoDataBySymbolForMonth(String symbol, LocalDate date) {
         LocalDate lastDayOfGivenMonth = date.plusMonths(1).minusDays(1);
 
-        return cryptoRepository.findBySymbolBetweenDays(symbol, date.atStartOfDay(), lastDayOfGivenMonth.atTime(LocalTime.MAX));
+        List<CryptoData> result = cryptoRepository.findBySymbolBetweenDays(symbol, date.atStartOfDay(), lastDayOfGivenMonth.atTime(LocalTime.MAX));
+
+        if (result.isEmpty()) {
+            throw CryptoDataNotAvailableException.forSymbolAndDateRange(symbol, date, lastDayOfGivenMonth);
+        }
+
+        return result;
     }
 
     @Cacheable(value = DATABASE_CACHE)
@@ -76,7 +82,13 @@ public class CryptoService {
         LocalDate realFrom = dateFrom.isBefore(dateTo) ? dateFrom : dateTo;
         LocalDate realTo = dateFrom.isBefore(dateTo) ? dateTo : dateFrom;
 
-        return cryptoRepository.findBySymbolBetweenDays(symbol, realFrom.atStartOfDay(), realTo.atTime(LocalTime.MAX));
+        List<CryptoData> result = cryptoRepository.findBySymbolBetweenDays(symbol, realFrom.atStartOfDay(), realTo.atTime(LocalTime.MAX));
+
+        if (result.isEmpty()) {
+            throw CryptoDataNotAvailableException.forSymbolAndDateRange(symbol, realFrom, realTo);
+        }
+
+        return result;
     }
 
     public List<String> getAvailableCryptos() {

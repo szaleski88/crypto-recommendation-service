@@ -113,7 +113,7 @@ class CryptoRestControllerTest {
                                                 .currency("CUR")
                                                 .normalizedValue(BigDecimal.TEN)
                                                 .build();
-        given(reportGenerator.generateReportFor(anyString(), any(), any(LocalDate.class))).willReturn(cryptoReport);
+        given(reportGenerator.generateReportFor(anyString(), any())).willReturn(cryptoReport);
 
         // when
 

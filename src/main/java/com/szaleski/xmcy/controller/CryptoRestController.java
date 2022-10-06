@@ -49,7 +49,7 @@ public class CryptoRestController {
         LocalDate firstDayOfAMonth = LocalDate.of(year, month, 1);
         List<CryptoData> reportData = cryptoService.getCryptoDataBySymbolForMonth(currencySymbol, firstDayOfAMonth);
 
-        return reportGenerator.generateReportFor(currencySymbol, reportData, firstDayOfAMonth);
+        return reportGenerator.generateReportFor(currencySymbol, reportData);
     }
 
     @Operation(summary = "Get report of given crypto for custom date range")
@@ -60,7 +60,7 @@ public class CryptoRestController {
 
         List<CryptoData> reportData = cryptoService.getCryptoDataBySymbolForRange(currencySymbol, toLocalDate(dateFrom), toLocalDate(dateTo));
 
-        return reportGenerator.generateReportFor(currencySymbol, reportData, toLocalDate(dateFrom));
+        return reportGenerator.generateReportFor(currencySymbol, reportData);
     }
 
     @Operation(summary = "Get normalized ranges of all available currencies")

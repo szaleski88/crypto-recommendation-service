@@ -21,11 +21,11 @@ public class CryptoReportGenerator {
     private final CryptoFilter cryptoFilter;
     private final CryptoDataRangeNormalizer cryptoDataRangeNormalizer;
 
-    public CryptoReport generateReportFor(String symbol, List<CryptoData> dataForReport, LocalDate date) {
-        if (dataForReport.isEmpty()) {
-            throw CryptoDataNotAvailableException.forSymbolAndDate(symbol, date);
+    public CryptoReport generateReportFor(String symbol, List<CryptoData> dataForReport) {
+        if(dataForReport.isEmpty()) {
+            return new CryptoReport();
         }
-
+        
         final CryptoData min = cryptoFilter.getMin(dataForReport);
         final CryptoData max = cryptoFilter.getMax(dataForReport);
         final CryptoData oldest = cryptoFilter.getOldest(dataForReport);

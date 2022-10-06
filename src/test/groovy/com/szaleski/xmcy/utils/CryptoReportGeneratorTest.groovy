@@ -13,20 +13,15 @@ class CryptoReportGeneratorTest extends Specification {
     private static CryptoData NEW_MAX = new CryptoData(of(2023, 01, 01, 00, 00), "aaa", BigDecimal.TEN)
     private static String SYMBOL = "SYMBOL"
 
-    def "Exception thrown when no data for report"() {
+    def "Empty report when no data for report"() {
         given:
         def generator = new CryptoReportGenerator(Mock(CryptoFilter), Mock(CryptoDataRangeNormalizer))
 
         when:
-        generator.generateReportFor(SYMBOL, [], null)
+        def reportFor = generator.generateReportFor(SYMBOL, [])
 
         then:
-        CryptoDataNotAvailableException exc = thrown()
-        with(exc) {
-            it.symbol == SYMBOL
-            it.date == null
-            it.getMessage() == "No data for Crypto symbol: '$SYMBOL' for date: 'None'."
-        }
+        reportFor == new CryptoReport()
     }
 
     def "Report generated with expected values"() {
@@ -34,7 +29,7 @@ class CryptoReportGeneratorTest extends Specification {
         def generator = new CryptoReportGenerator(cryptoFilterForTestData(), new CryptoDataRangeNormalizer())
 
         when:
-        CryptoReport report = generator.generateReportFor(SYMBOL, [NEW_MAX, OLD_MIN], null)
+        CryptoReport report = generator.generateReportFor(SYMBOL, [NEW_MAX, OLD_MIN])
 
         then:
         with(report) {
