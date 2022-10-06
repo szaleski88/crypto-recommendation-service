@@ -2,12 +2,17 @@ package com.szaleski.xmcy.controller;
 
 import static com.szaleski.xmcy.utils.DateUtils.toLocalDate;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
+import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +32,7 @@ import lombok.AllArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/crypto")
 @AllArgsConstructor
+@Validated
 public class CryptoRestController {
 
     private CryptoService cryptoService;
@@ -35,19 +41,23 @@ public class CryptoRestController {
     @Operation(summary = "Get monthly report of given crypto")
     @GetMapping(value = "/{currencySymbol}/monthlyReport")
     public CryptoReport getCryptoReportForMonth(@Parameter(example = "BTC") @PathVariable String currencySymbol,
-                                                @Parameter(example = "2022-01")
+                                                @Parameter(example = "10", description = "number of the month")
                                                 @RequestParam(name = "month")
-                                                @DateTimeFormat(pattern = "yyyy-MM") @Valid Date month) {
-        List<CryptoData> reportData = cryptoService.getCryptoDataBySymbolForMonth(currencySymbol, toLocalDate(month));
+                                                @Range(min = 1, max = 12, message = "Month must be between 1 or 12") int month,
+                                                @Parameter(example = "2022", description = "a year. Starting from 2022")
+                                                @RequestParam(name = "year")
+                                                @Min(value = 2022, message = "Year shouldn't be before 2022") int year) {
+        LocalDate firstDayOfAMonth = LocalDate.of(year, month, 1);
+        List<CryptoData> reportData = cryptoService.getCryptoDataBySymbolForMonth(currencySymbol, firstDayOfAMonth);
 
-        return reportGenerator.generateReportFor(currencySymbol, reportData, toLocalDate(month));
+        return reportGenerator.generateReportFor(currencySymbol, reportData, firstDayOfAMonth);
     }
 
     @Operation(summary = "Get report of given crypto for custom date range")
     @GetMapping(value = "/{currencySymbol}/customReport")
     public CryptoReport getCryptoReport(@Parameter(example = "BTC") @PathVariable String currencySymbol,
-                                        @Parameter(example = "2022-01-01") @RequestParam(name = "dateFrom") @DateTimeFormat(pattern = "yyyy-MM-dddd") @Valid Date dateFrom,
-                                        @Parameter(example = "2022-01-02") @RequestParam(name = "dateTo") @DateTimeFormat(pattern = "yyyy-MM-dddd") @Valid Date dateTo) {
+                                        @Parameter(example = "2022-01-01") @RequestParam(name = "dateFrom") @DateTimeFormat(pattern = "yyyy-MM-dd") @Valid Date dateFrom,
+                                        @Parameter(example = "2022-01-02") @RequestParam(name = "dateTo") @DateTimeFormat(pattern = "yyyy-MM-dd") @Valid Date dateTo) {
 
         List<CryptoData> reportData = cryptoService.getCryptoDataBySymbolForRange(currencySymbol, toLocalDate(dateFrom), toLocalDate(dateTo));
 

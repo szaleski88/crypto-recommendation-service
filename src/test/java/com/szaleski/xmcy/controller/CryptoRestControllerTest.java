@@ -1,11 +1,10 @@
 package com.szaleski.xmcy.controller;
 
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -20,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException;
 import com.szaleski.xmcy.model.CryptoReport;
@@ -43,6 +44,45 @@ class CryptoRestControllerTest {
     private CacheManager cacheManager;
 
     @Test
+    public void invalidValueFor_Month_parameterReturnsBadRequest() throws Exception {
+        // given
+        given(cryptoService.getCryptoDataBySymbolForMonth(anyString(), any(LocalDate.class))).willReturn(List.of());
+
+        // when
+        // then
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/crypto/BTC/monthlyReport?year=2022&month=-1")).andReturn();
+
+        then(mvcResult.getResponse().getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        then(mvcResult.getResolvedException().getMessage()).contains("Month must be between 1 or 12");
+    }
+
+    @Test
+    public void invalidValueFor_Year_parameterReturnsBadRequest() throws Exception {
+        // given
+        given(cryptoService.getCryptoDataBySymbolForMonth(anyString(), any(LocalDate.class))).willReturn(List.of());
+
+        // when
+        // then
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/crypto/BTC/monthlyReport?month=1&year=2020")).andReturn();
+
+        then(mvcResult.getResponse().getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        then(mvcResult.getResolvedException().getMessage()).contains("Year shouldn't be before 2022");
+    }
+
+    @Test
+    public void invalidValueFor_YearAndMonth_parametersReturnsBadRequest() throws Exception {
+        // given
+        given(cryptoService.getCryptoDataBySymbolForMonth(anyString(), any(LocalDate.class))).willReturn(List.of());
+
+        // when
+        // then
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/crypto/BTC/monthlyReport?month=-1&year=2020")).andReturn();
+
+        then(mvcResult.getResponse().getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        then(mvcResult.getResolvedException().getMessage()).contains("Year shouldn't be before 2022", "Month must be between 1 or 12");
+    }
+
+    @Test
     public void missing_Month_parameterReturnsBadRequest() throws Exception {
         // given
         given(cryptoService.getCryptoDataBySymbolForMonth(anyString(), any(LocalDate.class))).willReturn(List.of());
@@ -51,8 +91,19 @@ class CryptoRestControllerTest {
         // then
         mockMvc.perform(get("/api/v1/crypto/BTC/monthlyReport"))
                .andExpect(status().isBadRequest())
-               .andExpect(content().string("Required request parameter 'month' for method parameter type Date is not present"));
+               .andExpect(content().string("Required request parameter 'month' for method parameter type int is not present"));
+    }
 
+    @Test
+    public void missing_Year_parameterReturnsBadRequest() throws Exception {
+        // given
+        given(cryptoService.getCryptoDataBySymbolForMonth(anyString(), any(LocalDate.class))).willReturn(List.of());
+
+        // when
+        // then
+        mockMvc.perform(get("/api/v1/crypto/BTC/monthlyReport?month=1"))
+               .andExpect(status().isBadRequest())
+               .andExpect(content().string("Required request parameter 'year' for method parameter type int is not present"));
     }
 
     @Test
@@ -67,7 +118,7 @@ class CryptoRestControllerTest {
         // when
 
         // then
-        mockMvc.perform(get("/api/v1/crypto/BTC/monthlyReport?month=2022-01"))
+        mockMvc.perform(get("/api/v1/crypto/BTC/monthlyReport?month=01&year=2022"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("currency").value(cryptoReport.getCurrency()))
                .andExpect(jsonPath("normalizedValue").value(cryptoReport.getNormalizedValue()));
