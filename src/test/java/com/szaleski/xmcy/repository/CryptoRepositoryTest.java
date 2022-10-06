@@ -1,10 +1,12 @@
 package com.szaleski.xmcy.repository;
 
+import static java.math.RoundingMode.FLOOR;
 import static org.assertj.core.api.BDDAssertions.then;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import com.szaleski.xmcy.model.Crypto;
+import com.szaleski.xmcy.model.CryptoData;
 
 @DataJpaTest
 class CryptoRepositoryTest {
@@ -23,10 +26,10 @@ class CryptoRepositoryTest {
     public static final LocalDateTime JANUARY = LocalDateTime.of(2022, 1, 1, 12, 0, 0);
     public static final LocalDateTime FEBRUARY = LocalDateTime.of(2022, 2, 1, 12, 0, 0);
     public static final LocalDateTime MARCH = LocalDateTime.of(2022, 3, 1, 12, 0, 0);
-    public static final Crypto CRYPTO_JAN1 = new Crypto(null, JANUARY, symbolFromMonth(JANUARY), BigDecimal.ONE);
-    public static final Crypto CRYPTO_JAN2 = new Crypto(null, JANUARY.plusDays(1), symbolFromMonth(JANUARY), BigDecimal.TEN);
-    public static final Crypto CRYPTO_FEB = new Crypto(null, FEBRUARY, symbolFromMonth(FEBRUARY), BigDecimal.TEN);
-    public static final Crypto CRYPTO_MAR = new Crypto(null, MARCH, symbolFromMonth(MARCH), BigDecimal.ZERO);
+    public static final Crypto CRYPTO_JAN1 = new Crypto(null, JANUARY, symbolFromMonth(JANUARY), BigDecimal.ONE.setScale(3, FLOOR));
+    public static final Crypto CRYPTO_JAN2 = new Crypto(null, JANUARY.plusDays(1), symbolFromMonth(JANUARY), BigDecimal.TEN.setScale(3, FLOOR));
+    public static final Crypto CRYPTO_FEB = new Crypto(null, FEBRUARY, symbolFromMonth(FEBRUARY), BigDecimal.TEN.setScale(3, FLOOR));
+    public static final Crypto CRYPTO_MAR = new Crypto(null, MARCH, symbolFromMonth(MARCH), BigDecimal.ZERO.setScale(3, FLOOR));
 
     @Autowired
     private CryptoRepository cryptoRepository;
@@ -51,10 +54,10 @@ class CryptoRepositoryTest {
     @MethodSource("findBySymbolBetweenDaysTestData")
     void findBySymbolBetweenDays(String symbol, LocalDateTime dateFrom, LocalDateTime dateTo, List<Crypto> expectedResult) {
         // when
-        List<Crypto> result = cryptoRepository.findBySymbolBetweenDays(symbol, dateFrom, dateTo);
+        List<CryptoData> result = cryptoRepository.findBySymbolBetweenDays(symbol, dateFrom, dateTo);
 
         // then
-        then(result).containsExactlyInAnyOrderElementsOf(expectedResult);
+        then(result).containsExactlyInAnyOrderElementsOf(asCryptoData(expectedResult));
     }
 
     public static Stream<Arguments> findBetweenDaysTestData() {
@@ -72,19 +75,19 @@ class CryptoRepositoryTest {
     @MethodSource("findBetweenDaysTestData")
     void findBetweenDays(LocalDateTime dateFrom, LocalDateTime dateTo, List<Crypto> expectedResult) {
         // when
-        List<Crypto> result = cryptoRepository.findBetweenDays(dateFrom, dateTo);
+        List<CryptoData> result = cryptoRepository.findBetweenDays(dateFrom, dateTo);
 
         // then
-        then(result).containsExactlyInAnyOrderElementsOf(expectedResult);
+        then(result).containsExactlyInAnyOrderElementsOf(asCryptoData(expectedResult));
     }
 
     @Test
     void findBySymbol() {
         // when
-        List<Crypto> result = cryptoRepository.findBySymbol(symbolFromMonth(JANUARY));
+        List<CryptoData> result = cryptoRepository.findBySymbol(symbolFromMonth(JANUARY));
 
         // then
-        then(result).containsExactlyInAnyOrder(CRYPTO_JAN1, CRYPTO_JAN2);
+        then(result).containsExactlyInAnyOrderElementsOf(asCryptoData(List.of(CRYPTO_JAN1, CRYPTO_JAN2)));
     }
 
     @Test
@@ -94,6 +97,10 @@ class CryptoRepositoryTest {
 
         // then
         then(result).containsExactlyInAnyOrder(symbolFromMonth(JANUARY), symbolFromMonth(FEBRUARY), symbolFromMonth(MARCH));
+    }
+
+    private List<CryptoData> asCryptoData(List<Crypto> expectedResult) {
+        return expectedResult.stream().map(CryptoData::fromCrypto).collect(Collectors.toList());
     }
 
     public static String symbolFromMonth(LocalDateTime aTime) {
