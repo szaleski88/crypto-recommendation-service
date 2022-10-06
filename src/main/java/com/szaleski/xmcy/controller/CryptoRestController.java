@@ -40,7 +40,7 @@ public class CryptoRestController {
     @Operation(summary = "Get monthly report of given crypto")
     @GetMapping(value = "/{currencySymbol}/monthlyReport")
     public CryptoReport getCryptoReportForMonth(@Parameter(example = "BTC") @PathVariable String currencySymbol,
-                                                @Parameter(example = "10", description = "number of the month")
+                                                @Parameter(example = "1", description = "number of the month")
                                                 @RequestParam(name = "month")
                                                 @Range(min = 1, max = 12, message = "Month must be between 1 or 12") int month,
                                                 @Parameter(example = "2022", description = "a year. Starting from 2022")
