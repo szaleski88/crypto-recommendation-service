@@ -1,6 +1,6 @@
 package com.szaleski.xmcy.utils
 
-import com.szaleski.xmcy.exceptions.CryptoDataNotAvailableException
+
 import com.szaleski.xmcy.model.CryptoData
 import com.szaleski.xmcy.model.CryptoReport
 import spock.lang.Specification
@@ -15,7 +15,7 @@ class CryptoReportGeneratorTest extends Specification {
 
     def "Empty report when no data for report"() {
         given:
-        def generator = new CryptoReportGenerator(Mock(CryptoFilter), Mock(CryptoDataRangeNormalizer))
+        def generator = new CryptoReportGenerator(null, null)
 
         when:
         def reportFor = generator.generateReportFor(SYMBOL, [])

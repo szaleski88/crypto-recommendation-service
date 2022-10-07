@@ -11,7 +11,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -40,9 +39,9 @@ class CryptoServiceTest {
 
     public static final LocalDate JANUARY = LocalDate.of(2022, 1, 1);
     public static final LocalDate FEBRUARY = LocalDate.of(2022, 2, 1);
-    public static final Crypto CRYPTO_JAN1 = new Crypto(null, JANUARY.atTime(LocalTime.NOON), symbolFromMonth(JANUARY), BigDecimal.ONE.setScale(3, FLOOR));
-    public static final Crypto CRYPTO_JAN2 = new Crypto(null, JANUARY.atTime(LocalTime.NOON).plusDays(1), symbolFromMonth(JANUARY), BigDecimal.TEN.setScale(3, FLOOR));
-    public static final Crypto CRYPTO_FEB = new Crypto(null, FEBRUARY.atTime(LocalTime.NOON), symbolFromMonth(FEBRUARY), BigDecimal.TEN.setScale(3, FLOOR));
+    public static final Crypto CRYPTO_JAN1 = new Crypto(null, JANUARY.atTime(LocalTime.NOON), symbolFromMonth(JANUARY), scaled(BigDecimal.ONE));
+    public static final Crypto CRYPTO_JAN2 = new Crypto(null, JANUARY.atTime(LocalTime.NOON).plusDays(1), symbolFromMonth(JANUARY), scaled(BigDecimal.TEN));
+    public static final Crypto CRYPTO_FEB = new Crypto(null, FEBRUARY.atTime(LocalTime.NOON), symbolFromMonth(FEBRUARY), scaled(BigDecimal.TEN));
 
     @Autowired
     CryptoService cryptoService;
@@ -158,13 +157,14 @@ class CryptoServiceTest {
 
         // when
         //then
-        thenThrownBy(() ->  cryptoService.getCryptoDataBySymbolForRange("A", FEBRUARY, JANUARY)).isInstanceOf(CryptoDataNotAvailableException.class);
+        thenThrownBy(() -> cryptoService.getCryptoDataBySymbolForRange("A", FEBRUARY, JANUARY)).isInstanceOf(CryptoDataNotAvailableException.class);
     }
 
     @Test
     public void highestNormalizedRangeForGivenDayProperlyConvertsDateToBeginningAndEndOfADay() {
         // given
-        given(cryptoRepository.findBetweenDays(any(LocalDateTime.class), any(LocalDateTime.class))).willReturn(List.of(fromCrypto(CRYPTO_JAN1), fromCrypto(CRYPTO_JAN2)));
+        given(cryptoRepository.findBetweenDays(any(LocalDateTime.class), any(LocalDateTime.class))).willReturn(
+            List.of(fromCrypto(CRYPTO_JAN1), fromCrypto(CRYPTO_JAN2)));
 
         // when
         NormalizedRanges result = cryptoService.getHighestNormalizedRangeForDay(JANUARY);
@@ -220,5 +220,9 @@ class CryptoServiceTest {
 
     public static String symbolFromMonth(LocalDate aTime) {
         return aTime.getMonth().toString();
+    }
+
+    private static BigDecimal scaled(BigDecimal decimal) {
+        return decimal.setScale(3, FLOOR);
     }
 }

@@ -4,7 +4,6 @@ import com.szaleski.xmcy.model.CryptoData
 import spock.lang.Specification
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 class CryptoDataRangeNormalizerTest extends Specification {
 
@@ -12,8 +11,8 @@ class CryptoDataRangeNormalizerTest extends Specification {
 
     def "Crypto price properly normalized"() {
         given:
-        def cryptoA = getMockWithSymbolAndPrice("A", BigDecimal.valueOf(min))
-        def cryptoB = getMockWithSymbolAndPrice("B", BigDecimal.valueOf(max))
+        def cryptoA = getCryptoData("A", min)
+        def cryptoB = getCryptoData("B", max)
 
         when:
         def result = normalizer.getSingleNormalizedRange([cryptoA, cryptoB])
@@ -30,11 +29,11 @@ class CryptoDataRangeNormalizerTest extends Specification {
 
     def "Data normalization for multiple currencies"() {
         given:
-        def cryptoA1 = getMockWithSymbolAndPrice("A", 1)
-        def cryptoA2 = getMockWithSymbolAndPrice("A", 2)
-        def cryptoB1 = getMockWithSymbolAndPrice("B", 2)
-        def cryptoB2 = getMockWithSymbolAndPrice("B", 4)
-        def cryptoC = getMockWithSymbolAndPrice("C", 7)
+        def cryptoA1 = getCryptoData("A", 1)
+        def cryptoA2 = getCryptoData("A", 2)
+        def cryptoB1 = getCryptoData("B", 2)
+        def cryptoB2 = getCryptoData("B", 4)
+        def cryptoC = getCryptoData("C", 7)
 
         def cryptoData = [cryptoA1, cryptoA2, cryptoB1, cryptoB2, cryptoC]
         when:
@@ -50,16 +49,16 @@ class CryptoDataRangeNormalizerTest extends Specification {
 
     def "Get Highest normalized Range"() {
         given:
-        def cryptoA1 = getMockWithSymbolAndPrice("A", 1)
-        def cryptoA2 = getMockWithSymbolAndPrice("A", 2)
-        def cryptoB = getMockWithSymbolAndPrice("B", 7)
+        def cryptoA1 = getCryptoData("A", 1)
+        def cryptoA2 = getCryptoData("A", 2)
+        def cryptoB = getCryptoData("B", 7)
 
         def cryptoData = [cryptoA1, cryptoA2, cryptoB]
         when:
         def result = normalizer.getHighestNormalizedRangeOfDay(cryptoData, LocalDate.now())
 
         then:
-
+        1 == result.getNormalizedRanges().entrySet().size()
         with(result.getNormalizedRanges()) {
             it.get("A") == 1
         }
@@ -74,14 +73,8 @@ class CryptoDataRangeNormalizerTest extends Specification {
     }
 
 
-    private CryptoData getMockWithSymbolAndPrice(String symbol, int price) {
-        return getMockWithSymbolAndPrice(symbol, BigDecimal.valueOf(price))
+    private CryptoData getCryptoData(String symbol, double price) {
+        return new CryptoData(null, symbol, BigDecimal.valueOf(price))
     }
 
-    private CryptoData getMockWithSymbolAndPrice(String symbol, BigDecimal price) {
-        return Mock(CryptoData) {
-            it.getSymbol() >> symbol
-            it.getPrice() >> price
-        }
-    }
 }
